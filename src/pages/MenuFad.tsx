@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, X, Star, Clock, Truck, Utensils, MapPin, CreditCard, Wallet } from 'lucide-react';
+import { Search, Filter, X, Star, Clock, Truck, Utensils, MapPin, CreditCard} from 'lucide-react';
 import NavBar from '../components/HomePage/NavBar';
 import Footer from '../components/Shared/Footer';
 import MenuHero from '../components/MenuD/hero';

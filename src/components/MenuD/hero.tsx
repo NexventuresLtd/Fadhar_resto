@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { motion } from 'framer-motion';
 import { Utensils, Star, Clock, ChevronDown } from 'lucide-react';
 
