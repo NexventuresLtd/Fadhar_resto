@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, X, Star, Clock, Truck, Utensils, MapPin, CreditCard} from 'lucide-react';
+import { Search, Filter, X, Star, Clock, Truck, Utensils, MapPin, QrCode, Copy, Check } from 'lucide-react';
 import NavBar from '../components/HomePage/NavBar';
 import Footer from '../components/Shared/Footer';
 import MenuHero from '../components/MenuD/hero';
@@ -25,6 +25,8 @@ const MenuComponent = () => {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [orderOption, setOrderOption] = useState('');
   const [notification, setNotification] = useState<Notification>(null);
+  const [paymentStep, setPaymentStep] = useState('options'); // options, details, payment, confirmation
+  const [copied, setCopied] = useState(false);
 
   // Sample menu data
   const menuData = [
@@ -97,6 +99,14 @@ const MenuComponent = () => {
     { id: 'fried', name: 'Fried Items' }
   ];
 
+  // MoMo payment details
+  const momoDetails = {
+    number: "024 123 4567",
+    name: "Fadhar's Restaurant",
+    amount: orderOption === 'pickup' ? (selectedItem ? (selectedItem.price / 2).toFixed(2) : '0.00') : (selectedItem ? selectedItem.price.toFixed(2) : '0.00'),
+    reference: `FADHAR-${Math.floor(1000 + Math.random() * 9000)}`
+  };
+
   // Filter menu items based on search and category
   const filteredItems = menuData.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,11 +120,17 @@ const MenuComponent = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleOrder = () => {
-    if (!orderOption) {
-      showNotification('Please select an order option', 'error');
-      return;
-    }
+  const handleOrderOptionSelect = (option: any) => {
+    setOrderOption(option);
+    setPaymentStep('details');
+  };
+
+  const handleProceedToPayment = () => {
+    setPaymentStep('payment');
+  };
+
+  const handlePaymentComplete = () => {
+    setPaymentStep('confirmation');
 
     let message = '';
     switch (orderOption) {
@@ -132,8 +148,18 @@ const MenuComponent = () => {
     }
 
     showNotification(message);
+  };
+
+  const copyToClipboard = (text: any) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const closePopup = () => {
     setSelectedItem(null);
     setOrderOption('');
+    setPaymentStep('options');
   };
 
   return (
@@ -262,10 +288,7 @@ const MenuComponent = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-                onClick={() => {
-                  setSelectedItem(null);
-                  setOrderOption('');
-                }}
+                onClick={closePopup}
               >
                 <motion.div
                   initial={{ scale: 0.9, opacity: 0 }}
@@ -274,127 +297,267 @@ const MenuComponent = () => {
                   className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="relative">
-                    <button
-                      className="absolute top-4 right-4 z-10 bg-white rounded-full p-2  hover:bg-gray-100"
-                      onClick={() => {
-                        setSelectedItem(null);
-                        setOrderOption('');
-                      }}
-                    >
-                      <X className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <div className="h-56 bg-gray-100 flex items-center justify-center">
-                      {selectedItem.image.startsWith('data:image') ? (
-                        <img src={selectedItem.image} alt={selectedItem.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="text-8xl">{selectedItem.image}</div>
+                  {paymentStep === 'options' && (
+                    <>
+                      <div className="relative">
+                        <button
+                          className="absolute top-4 right-4 z-10 bg-white rounded-full p-2  hover:bg-gray-100"
+                          onClick={closePopup}
+                        >
+                          <X className="w-5 h-5 text-gray-600" />
+                        </button>
+                        <div className="h-56 bg-gray-100 flex items-center justify-center">
+                          {selectedItem.image.startsWith('data:image') ? (
+                            <img src={selectedItem.image} alt={selectedItem.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="text-8xl">{selectedItem.image}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-6">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-2xl font-bold text-gray-800">{selectedItem.name}</h3>
+                          <span className="text-xl font-bold text-orange-600">${selectedItem.price.toFixed(2)}</span>
+                        </div>
+
+                        <div className="flex items-center mb-4">
+                          <div className="flex items-center mr-4">
+                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                            <span className="ml-1 font-medium text-gray-700">{selectedItem.rating}</span>
+                          </div>
+                          <div className="flex items-center text-gray-500">
+                            <Clock className="w-5 h-5 mr-1" />
+                            {selectedItem.prepTime}
+                          </div>
+                        </div>
+
+                        <p className="text-gray-600 mb-6">{selectedItem.description}</p>
+
+                        <div className="space-y-4 mb-6">
+                          <h4 className="font-semibold text-gray-800">How would you like to order?</h4>
+
+                          <div className="grid grid-cols-1 gap-3">
+                            <button
+                              onClick={() => handleOrderOptionSelect('delivery')}
+                              className="flex items-center p-4 border rounded-xl transition-colors border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                            >
+                              <Truck className="w-5 h-5 text-orange-500 mr-3" />
+                              <div className="text-left">
+                                <span className="font-medium block">Delivery</span>
+                                <span className="text-sm text-gray-600">Pay full amount upon delivery</span>
+                              </div>
+                            </button>
+
+                            <button
+                              onClick={() => handleOrderOptionSelect('pickup')}
+                              className="flex items-center p-4 border rounded-xl transition-colors border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                            >
+                              <MapPin className="w-5 h-5 text-orange-500 mr-3" />
+                              <div className="text-left">
+                                <span className="font-medium block">Pickup</span>
+                                <span className="text-sm text-gray-600">Pay 50% now, 50% upon pickup</span>
+                              </div>
+                            </button>
+
+                            <button
+                              onClick={() => handleOrderOptionSelect('table')}
+                              className="flex items-center p-4 border rounded-xl transition-colors border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                            >
+                              <Utensils className="w-5 h-5 text-orange-500 mr-3" />
+                              <div className="text-left">
+                                <span className="font-medium block">Book a Table</span>
+                                <span className="text-sm text-gray-600">Pay at restaurant</span>
+                              </div>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {paymentStep === 'details' && (
+                    <div className="p-6">
+                      <button
+                        onClick={() => setPaymentStep('options')}
+                        className="flex items-center text-gray-600 hover:text-gray-800 mb-6"
+                      >
+                        <X className="w-5 h-5 mr-1" />
+                        Back
+                      </button>
+
+                      <h3 className="text-2xl font-bold text-gray-800 mb-6">Order Details</h3>
+
+                      <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div className="flex items-center mb-4">
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                            {selectedItem.image.startsWith('data:image') ? (
+                              <img src={selectedItem.image} alt={selectedItem.name} className="w-12 h-12 object-cover" />
+                            ) : (
+                              <div className="text-2xl">{selectedItem.image}</div>
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-800">{selectedItem.name}</h4>
+                            <p className="text-sm text-gray-600">{selectedItem.description}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Item Price</span>
+                            <span>${selectedItem.price.toFixed(2)}</span>
+                          </div>
+                          {orderOption === 'delivery' && (
+                            <div className="flex justify-between">
+                              <span>Delivery Fee</span>
+                              <span>$2.50</span>
+                            </div>
+                          )}
+                          {orderOption === 'pickup' && (
+                            <div className="flex justify-between">
+                              <span>Deposit (50%)</span>
+                              <span>${(selectedItem.price / 2).toFixed(2)}</span>
+                            </div>
+                          )}
+                          <div className="border-t border-gray-200 pt-2 mt-2 font-semibold flex justify-between">
+                            <span>{orderOption === 'pickup' ? 'Amount to Pay Now' : 'Total Amount'}</span>
+                            <span>
+                              ${orderOption === 'pickup'
+                                ? (selectedItem.price / 2).toFixed(2)
+                                : orderOption === 'delivery'
+                                  ? (selectedItem.price + 2.5).toFixed(2)
+                                  : '0.00'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleProceedToPayment}
+                        className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all"
+                      >
+                        Continue to Payment
+                      </button>
+                    </div>
+                  )}
+
+                  {paymentStep === 'payment' && (
+                    <div className="p-6">
+                      <button
+                        onClick={() => setPaymentStep('details')}
+                        className="flex items-center text-gray-600 hover:text-gray-800 mb-6"
+                      >
+                        <X className="w-5 h-5 mr-1" />
+                        Back
+                      </button>
+
+                      <h3 className="text-2xl font-bold text-gray-800 mb-6">Complete Payment</h3>
+                      <p className="text-gray-600 mb-6">Scan the QR code or use the MoMo number below to complete your payment.</p>
+
+                      <div className="bg-gray-50 rounded-xl p-6 mb-6 text-center">
+                        <div className="w-40 h-40 mx-auto bg-white rounded-lg flex items-center justify-center mb-4 border border-gray-200">
+                          <QrCode className="w-32 h-32 text-gray-700" />
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-sm text-gray-600 mb-1">Send payment to</p>
+                            <div className="flex items-center justify-center">
+                              <span className="font-semibold text-lg">{momoDetails.number}</span>
+                              <button
+                                onClick={() => copyToClipboard(momoDetails.number)}
+                                className="ml-2 text-orange-500 hover:text-orange-600"
+                              >
+                                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                              </button>
+                            </div>
+                            <p className="text-sm text-gray-600">{momoDetails.name}</p>
+                          </div>
+
+                          <div>
+                            <p className="text-sm text-gray-600 mb-1">Amount</p>
+                            <p className="font-semibold text-lg">GH₵ {momoDetails.amount}</p>
+                          </div>
+
+                          <div>
+                            <p className="text-sm text-gray-600 mb-1">Reference</p>
+                            <div className="flex items-center justify-center">
+                              <span className="font-semibold">{momoDetails.reference}</span>
+                              <button
+                                onClick={() => copyToClipboard(momoDetails.reference)}
+                                className="ml-2 text-orange-500 hover:text-orange-600"
+                              >
+                                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+                        <p className="text-yellow-800 text-sm">
+                          <strong>Note:</strong> Please use the reference code above when making your payment. Your order will be confirmed once payment is received.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={handlePaymentComplete}
+                        className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all"
+                      >
+                        I've Completed Payment
+                      </button>
+                    </div>
+                  )}
+
+                  {paymentStep === 'confirmation' && (
+                    <div className="p-6 text-center">
+                      <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-6">
+                        <Check className="w-10 h-10 text-green-600" />
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-gray-800 mb-4">Order Confirmed!</h3>
+
+                      {orderOption === 'delivery' && (
+                        <p className="text-gray-600 mb-6">
+                          Your <strong>{selectedItem.name}</strong> is being prepared and will be delivered to you shortly.
+                          You'll pay GH₵ {(selectedItem.price + 2.5).toFixed(2)} upon delivery.
+                        </p>
                       )}
-                    </div>
-                  </div>
 
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-2xl font-bold text-gray-800">{selectedItem.name}</h3>
-                      <span className="text-xl font-bold text-orange-600">${selectedItem.price.toFixed(2)}</span>
-                    </div>
+                      {orderOption === 'pickup' && (
+                        <p className="text-gray-600 mb-6">
+                          Your <strong>{selectedItem.name}</strong> is being prepared for pickup.
+                          You've paid GH₵ {(selectedItem.price / 2).toFixed(2)} deposit.
+                          Please pay the remaining GH₵ {(selectedItem.price / 2).toFixed(2)} when you pickup your order.
+                        </p>
+                      )}
 
-                    <div className="flex items-center mb-4">
-                      <div className="flex items-center mr-4">
-                        <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                        <span className="ml-1 font-medium text-gray-700">{selectedItem.rating}</span>
+                      {orderOption === 'table' && (
+                        <p className="text-gray-600 mb-6">
+                          Your table has been reserved and your <strong>{selectedItem.name}</strong> will be prepared upon your arrival.
+                          Please arrive within 15 minutes of your booking time.
+                        </p>
+                      )}
+
+                      <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+                        <h4 className="font-semibold text-gray-800 mb-2">Order Details</h4>
+                        <div className="text-sm space-y-1">
+                          <p><span className="text-gray-600">Order ID:</span> {momoDetails.reference}</p>
+                          <p><span className="text-gray-600">Item:</span> {selectedItem.name}</p>
+                          <p><span className="text-gray-600">Total Amount:</span> GH₵ {orderOption === 'pickup' ? selectedItem.price.toFixed(2) : (selectedItem.price + 2.5).toFixed(2)}</p>
+                          <p><span className="text-gray-600">Paid:</span> GH₵ {orderOption === 'pickup' ? (selectedItem.price / 2).toFixed(2) : '0.00'}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center text-gray-500">
-                        <Clock className="w-5 h-5 mr-1" />
-                        {selectedItem.prepTime}
-                      </div>
+
+                      <button
+                        onClick={closePopup}
+                        className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all"
+                      >
+                        Done
+                      </button>
                     </div>
-
-                    <p className="text-gray-600 mb-6">{selectedItem.description}</p>
-
-                    <div className="space-y-4 mb-6">
-                      <h4 className="font-semibold text-gray-800">How would you like to order?</h4>
-
-                      <div className="grid grid-cols-1 gap-3">
-                        <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${orderOption === 'delivery' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
-                          }`}>
-                          <input
-                            type="radio"
-                            name="orderOption"
-                            value="delivery"
-                            checked={orderOption === 'delivery'}
-                            onChange={() => setOrderOption('delivery')}
-                            className="sr-only"
-                          />
-                          <div className="flex items-center">
-                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${orderOption === 'delivery' ? 'border-orange-500 bg-orange-500' : 'border-gray-400'
-                              }`}>
-                              {orderOption === 'delivery' && (
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              )}
-                            </div>
-                            <Truck className="w-5 h-5 text-orange-500 mr-2" />
-                            <span className="font-medium">Delivery</span>
-                          </div>
-                          <div className="ml-auto text-sm text-gray-600">Pay full amount</div>
-                        </label>
-
-                        <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${orderOption === 'pickup' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
-                          }`}>
-                          <input
-                            type="radio"
-                            name="orderOption"
-                            value="pickup"
-                            checked={orderOption === 'pickup'}
-                            onChange={() => setOrderOption('pickup')}
-                            className="sr-only"
-                          />
-                          <div className="flex items-center">
-                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${orderOption === 'pickup' ? 'border-orange-500 bg-orange-500' : 'border-gray-400'
-                              }`}>
-                              {orderOption === 'pickup' && (
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              )}
-                            </div>
-                            <MapPin className="w-5 h-5 text-orange-500 mr-2" />
-                            <span className="font-medium">Pickup</span>
-                          </div>
-                          <div className="ml-auto text-sm text-gray-600">Pay 50% now, 50% later</div>
-                        </label>
-
-                        <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${orderOption === 'table' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
-                          }`}>
-                          <input
-                            type="radio"
-                            name="orderOption"
-                            value="table"
-                            checked={orderOption === 'table'}
-                            onChange={() => setOrderOption('table')}
-                            className="sr-only"
-                          />
-                          <div className="flex items-center">
-                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${orderOption === 'table' ? 'border-orange-500 bg-orange-500' : 'border-gray-400'
-                              }`}>
-                              {orderOption === 'table' && (
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              )}
-                            </div>
-                            <Utensils className="w-5 h-5 text-orange-500 mr-2" />
-                            <span className="font-medium">Book a Table</span>
-                          </div>
-                          <div className="ml-auto text-sm text-gray-600">Pay at restaurant</div>
-                        </label>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleOrder}
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center"
-                    >
-                      <CreditCard className="w-5 h-5 mr-2" />
-                      {orderOption === 'pickup' ? 'Pay 50% Now' : 'Continue to Payment'}
-                    </button>
-                  </div>
+                  )}
                 </motion.div>
               </motion.div>
             )}

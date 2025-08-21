@@ -8,15 +8,10 @@ import AboutUS from '../components/HomePage/AboutUS';
 
 
 const Homepage: React.FC = () => {
-
- 
-
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <NavBar />
-<div className="pt-20"></div>
+      <div className="pt-20"></div>
       <Hero />
       <OurMenu />
       <AboutUS />
