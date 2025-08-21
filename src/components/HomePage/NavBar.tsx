@@ -46,7 +46,7 @@ const NavBar = () => {
                             <a href="/" className={`font-medium transition-colors ${isScrolled ? 'text-gray-800' : 'text-gray-700'}`}>Home</a>
                             <a href="#about" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>About Us</a>
                             <a href="#contact" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Contact</a>
-                            <a href="#" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Deliveries</a>
+                            {/* <a href="#" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Deliveries</a> */}
                             <a href="/menu" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Menu</a>
                         </div>
 
@@ -85,7 +85,7 @@ const NavBar = () => {
                                 <a href="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 hover:bg-orange-50 hover:text-orange-600">Home</a>
                                 <a href="#about" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">About Us</a>
                                 <a href="#contact" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Contact</a>
-                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Delivers</a>
+                                {/* <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Delivers</a> */}
                                 <a href="/menu" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Menu</a>
                             </div>
                         </motion.div>
