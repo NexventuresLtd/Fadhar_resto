@@ -43,11 +43,11 @@ const NavBar = () => {
 
                         {/* Desktop Navigation */}
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#" className={`font-medium transition-colors ${isScrolled ? 'text-gray-800' : 'text-gray-700'}`}>Home</a>
+                            <a href="/" className={`font-medium transition-colors ${isScrolled ? 'text-gray-800' : 'text-gray-700'}`}>Home</a>
                             <a href="#about" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>About Us</a>
                             <a href="#contact" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Contact</a>
                             <a href="#" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Deliveries</a>
-                            <a href="#" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Menu</a>
+                            <a href="/menu" className={`transition-colors ${isScrolled ? 'text-gray-600 hover:text-orange-500' : 'text-gray-700 hover:font-medium'}`}>Menu</a>
                         </div>
 
                         <div className="flex items-center space-x-4">
@@ -62,7 +62,7 @@ const NavBar = () => {
                             <div className="md:hidden">
                                 <button
                                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                    className={`p-2 rounded-full ${isScrolled ? 'bg-orange-100 text-orange-600' : 'bg-white/20 text-white'}`}
+                                    className={`p-2 rounded-full ${isScrolled ? 'bg-orange-100 text-orange-600' : 'bg-orange-100 text-orange-600'}`}
                                 >
                                     {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                                 </button>
@@ -82,12 +82,11 @@ const NavBar = () => {
                             className="md:hidden bg-white shadow-lg"
                         >
                             <div className="px-2 pt-2 pb-4 space-y-1 sm:px-3">
-                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 hover:bg-orange-50 hover:text-orange-600">Home</a>
-                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Offer</a>
-                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Service</a>
-                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Menu</a>
-                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">About Us</a>
-                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-orange-600 hover:bg-orange-50">Contact Us</a>
+                                <a href="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-800 hover:bg-orange-50 hover:text-orange-600">Home</a>
+                                <a href="#about" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">About Us</a>
+                                <a href="#contact" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Contact</a>
+                                <a href="#" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Delivers</a>
+                                <a href="/menu" className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-orange-50 hover:text-orange-600">Menu</a>
                             </div>
                         </motion.div>
                     )}
