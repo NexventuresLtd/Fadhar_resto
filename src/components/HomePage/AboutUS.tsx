@@ -62,7 +62,7 @@ export default function AboutUS() {
                             >
                                 {/* Map Placeholder */}
                                 <div className="bg-stone-200 rounded-lg h-64 flex items-center justify-center relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-stone-200 opacity-50"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-stone-200 opacity-50"></div>
                                     <div className="relative text-center space-y-2">
                                         <MapPin className="w-12 h-12 text-stone-600 mx-auto" />
                                         <p className="text-stone-600 font-medium">Interactive Map</p>
@@ -89,9 +89,9 @@ export default function AboutUS() {
                                         >
                                             <motion.div
                                                 whileHover={{ scale: 1.1, rotate: 5 }}
-                                                className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
+                                                className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
                                             >
-                                                <MapPin className="w-6 h-6 text-orange-600" />
+                                                <MapPin className="w-6 h-6 text-green-600" />
                                             </motion.div>
                                             <div id="contact">
                                                 <p className="font-semibold text-stone-800">Address</p>
@@ -106,9 +106,9 @@ export default function AboutUS() {
                                         >
                                             <motion.div
                                                 whileHover={{ scale: 1.1, rotate: -5 }}
-                                                className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
+                                                className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
                                             >
-                                                <Phone className="w-6 h-6 text-orange-600" />
+                                                <Phone className="w-6 h-6 text-green-600" />
                                             </motion.div>
                                             <div>
                                                 <p className="font-semibold text-stone-800">Phone</p>
@@ -123,9 +123,9 @@ export default function AboutUS() {
                                         >
                                             <motion.div
                                                 whileHover={{ scale: 1.1, rotate: 5 }}
-                                                className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"
+                                                className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
                                             >
-                                                <Mail className="w-6 h-6 text-orange-600" />
+                                                <Mail className="w-6 h-6 text-green-600" />
                                             </motion.div>
                                             <div>
                                                 <p className="font-semibold text-stone-800">Email</p>
@@ -169,7 +169,7 @@ export default function AboutUS() {
                 >
                     <div className="bg-stone-800 py-12">
                         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                            <h3 className="text-3xl font-bold text-orange-400 mb-4">
+                            <h3 className="text-3xl font-bold text-green-400 mb-4">
                                 Ready for an Unforgettable Dining Experience?
                             </h3>
                             <p className="text-xl text-stone-300 mb-8">
@@ -178,7 +178,7 @@ export default function AboutUS() {
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="bg-orange-500 rounded-2xl cursor-pointer text-white px-10 py-4 text-lg font-semibold hover:bg-orange-600 transition-colors duration-200"
+                                className="bg-green-500 rounded-2xl cursor-pointer text-white px-10 py-4 text-lg font-semibold hover:bg-green-600 transition-colors duration-200"
                             >
                                 Book Your Table Today
                             </motion.button>

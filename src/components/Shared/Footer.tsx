@@ -17,20 +17,20 @@ export default function Footer() {
                         <div>
                             <h4 className="text-lg font-semibold text-white mb-4">Menu</h4>
                             <ul className="space-y-2 text-gray-400">
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">Burgers</a></li>
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">Pizza</a></li>
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">Fried Items</a></li>
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">Beverages</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">Burgers</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">Pizza</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">Fried Items</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">Beverages</a></li>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-lg font-semibold text-white mb-4">Information</h4>
                             <ul className="space-y-2 text-gray-400">
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">About Us</a></li>
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">Contact</a></li>
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">Fast Delivery</a></li>
-                                <li><a href="#" className="hover:text-orange-400 transition-colors">Terms</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">About Us</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">Contact</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">Fast Delivery</a></li>
+                                <li><a href="#" className="hover:text-green-400 transition-colors">Terms</a></li>
                             </ul>
                         </div>
 

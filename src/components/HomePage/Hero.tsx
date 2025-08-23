@@ -17,7 +17,7 @@ export default function Hero() {
     return (
         <>
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-orange-200 to-red-200 pt-16">
+            <section className="relative overflow-hidden bg-gradient-to-br from-green-200 to-green-200 pt-16">
                 <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         {/* Left Content */}
@@ -32,15 +32,15 @@ export default function Hero() {
                                 className="text-3xl lg:text-6xl font-bold text-gray-800 leading-tight"
                             >
                                 All Fast Food is<br />
-                                Available at <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">Fadhar's</span>
+                                Available at <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-500">Fadhar's</span>
                             </motion.h1>
 
                             <motion.div
                                 variants={fadeInUp}
                                 className="flex items-center space-x-4 text-gray-600"
                             >
-                                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                                    <Utensils className="w-6 h-6 text-orange-500" />
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <Utensils className="w-6 h-6 text-green-500" />
                                 </div>
                                 <div>
                                     <p className="font-medium">We Are Just a Click Away When You</p>
@@ -55,14 +55,14 @@ export default function Hero() {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-gradient-to-r cursor-pointer from-orange-500 to-red-500 text-white px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold transition-all flex items-center justify-center space-x-2"
+                                    className="bg-gradient-to-r cursor-pointer from-green-500 to-green-500 text-white px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold transition-all flex items-center justify-center space-x-2"
                                 >
                                     <span>Order Now</span>
                                 </motion.button>
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="border-2 cursor-pointer border-gray-300 text-gray-700 px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold hover:border-orange-500 hover:text-orange-500 transition-all"
+                                    className="border-2 cursor-pointer border-gray-300 text-gray-700 px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold hover:border-green-500 hover:text-green-500 transition-all"
                                 >
                                     Contact Us
                                 </motion.button>
@@ -127,12 +127,12 @@ export default function Hero() {
                                         {popularDishes[currentSlide].description}
                                     </p>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-bold text-orange-500">{popularDishes[currentSlide].price}</span>
+                                        <span className="text-lg font-bold text-green-500">{popularDishes[currentSlide].price}</span>
                                         <div className="flex items-center">
                                             {[...Array(5)].map((_, i) => (
                                                 <Star
                                                     key={i}
-                                                    className={`w-4 h-4 ${i < Math.floor(popularDishes[currentSlide].rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                                                    className={`w-4 h-4 ${i < Math.floor(popularDishes[currentSlide].rating) ? 'text-green-400 fill-current' : 'text-gray-300'}`}
                                                 />
                                             ))}
                                         </div>

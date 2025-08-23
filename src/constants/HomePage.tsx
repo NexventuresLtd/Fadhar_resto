@@ -38,9 +38,9 @@ import { Truck, Utensils, Wallet } from "lucide-react";
   ];
 
   export const categories = [
-    { name: "Burgers", icon: "🍔", color: "from-orange-400 to-red-400" },
-    { name: "Pizza", icon: "🍕", color: "from-yellow-400 to-orange-400" },
-    { name: "Fried Items", icon: "🍗", color: "from-red-400 to-pink-400" }
+    { name: "Burgers", icon: "🍔", color: "from-green-400 to-green-400" },
+    { name: "Pizza", icon: "🍕", color: "from-green-400 to-green-400" },
+    { name: "Fried Items", icon: "🍗", color: "from-green-400 to-green-400" }
   ];
   export  const features = [
     {
@@ -48,18 +48,18 @@ import { Truck, Utensils, Wallet } from "lucide-react";
       title: "Home Delivery",
       desc: "Order online and get fresh meals delivered to your door. Typical delivery window is 45–60 minutes. Choose delivery or pickup during checkout.",
       icon: Truck,
-      bgColor: "from-orange-50 to-orange-100",
-      border: "border-orange-100",
-      iconBg: "from-orange-500 to-red-500",
+      bgColor: "from-green-50 to-green-100",
+      border: "border-green-100",
+      iconBg: "from-green-500 to-green-500",
     },
     {
       id: 2,
       title: "Instant Table Booking",
       desc: "Pick an available table and confirm instantly. Your booking holds for 30 minutes—if you don’t arrive, it auto-cancels and the table reopens.",
       icon: Utensils,
-      bgColor: "from-yellow-50 to-yellow-100",
-      border: "border-yellow-100",
-      iconBg: "from-yellow-500 to-orange-500",
+      bgColor: "from-green-50 to-green-100",
+      border: "border-green-100",
+      iconBg: "from-green-500 to-green-500",
     },
     {
       id: 3,
