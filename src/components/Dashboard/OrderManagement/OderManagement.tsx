@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, SortAsc, SortDesc, X, Eye, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Search, Filter, SortAsc, SortDesc, X, Eye, ChevronDown, RefreshCw } from 'lucide-react';
 import mainAxios from '../../../Instance/mainAxios';
 
 interface Order {
