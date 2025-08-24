@@ -27,7 +27,7 @@ interface OrderData {
     order_type: 'delivery' | 'pickup' | 'booking';
     item_id: number;
     quantity: number;
-    table_number?: string;
+    table_number?: number;
 }
 
 interface BookingData {
@@ -171,13 +171,13 @@ const CustomerMenu: React.FC = () => {
                 setError('Please provide your name and phone number');
                 return;
             }
-            
+
             // Validate number of people
             if (bookingData.number_of_people < 1) {
                 setError('Number of people must be at least 1');
                 return;
             }
-            
+
             try {
                 setLoading(true);
                 await fetchAvailableTables();
@@ -229,7 +229,7 @@ const CustomerMenu: React.FC = () => {
                 ...orderData,
                 customer_name: orderData.customer_name || bookingData.customer_name,
                 customer_phone: orderData.customer_phone || bookingData.customer_phone,
-                table_number: orderType === 'booking' ? availableTables.find(t => t.id === bookingData.table_id)?.number : undefined
+                table_number: orderType === 'booking' ? availableTables.find(t => t.id === bookingData.table_id)?.id : undefined
             };
 
             await mainAxios.post('/orders/add', orderPayload);
@@ -289,7 +289,7 @@ const CustomerMenu: React.FC = () => {
                 return (
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium text-gray-900">Booking Details</h3>
-                        
+
                         {/* Customer Information for Booking */}
                         <div className="space-y-4">
                             <div>
@@ -313,7 +313,7 @@ const CustomerMenu: React.FC = () => {
                                 />
                             </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Number of People</label>
@@ -357,7 +357,7 @@ const CustomerMenu: React.FC = () => {
                                 <ChevronLeft size={20} />
                             </button>
                         </div>
-                        
+
                         {loading ? (
                             <div className="text-center py-8">
                                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -375,8 +375,8 @@ const CustomerMenu: React.FC = () => {
                                             key={table.id}
                                             onClick={() => setBookingData({ ...bookingData, table_id: table.id })}
                                             className={`p-4 border-2 rounded-lg text-left transition-all ${bookingData.table_id === table.id
-                                                    ? 'border-green-500 bg-green-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-green-500 bg-green-50'
+                                                : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
                                             <div className="font-medium">Table {table.number}</div>
@@ -663,7 +663,9 @@ const CustomerMenu: React.FC = () => {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
                             >
+
                                 <div className="p-6">
+
                                     <div className="flex justify-between items-center mb-6">
                                         <h2 className="text-xl font-semibold text-gray-900">Order {selectedItem.name}</h2>
                                         <button
@@ -679,7 +681,22 @@ const CustomerMenu: React.FC = () => {
                                             <X size={24} />
                                         </button>
                                     </div>
-
+                                    {/* Error Message */}
+                                    <AnimatePresence>
+                                        {error && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0 }}
+                                                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex justify-between items-center"
+                                            >
+                                                <span>{error}</span>
+                                                <button onClick={() => setError(null)} className="text-red-800 hover:text-red-900">
+                                                    <X size={18} />
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                     {!orderSuccess && !bookingSuccess ? (
                                         <>
                                             {/* Order Type Selection */}
@@ -689,8 +706,8 @@ const CustomerMenu: React.FC = () => {
                                                     <button
                                                         onClick={() => handleOrderTypeChange('delivery')}
                                                         className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'delivery'
-                                                                ? 'bg-green-600 text-white'
-                                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                            ? 'bg-green-600 text-white'
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
                                                         <MapPin size={20} />
@@ -699,8 +716,8 @@ const CustomerMenu: React.FC = () => {
                                                     <button
                                                         onClick={() => handleOrderTypeChange('pickup')}
                                                         className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'pickup'
-                                                                ? 'bg-green-600 text-white'
-                                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                            ? 'bg-green-600 text-white'
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
                                                         <ShoppingCart size={20} />
@@ -709,8 +726,8 @@ const CustomerMenu: React.FC = () => {
                                                     <button
                                                         onClick={() => handleOrderTypeChange('booking')}
                                                         className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'booking'
-                                                                ? 'bg-green-600 text-white'
-                                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                            ? 'bg-green-600 text-white'
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
                                                         <Calendar size={20} />
