@@ -122,11 +122,14 @@ const CustomerMenu: React.FC = () => {
 
     const fetchAvailableTables = async () => {
         try {
+            setLoading(true);
             const response = await mainAxios.get('/tables/available');
             setAvailableTables(response.data);
         } catch (err) {
             setError('Failed to fetch available tables');
             console.error('Error fetching tables:', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -139,6 +142,7 @@ const CustomerMenu: React.FC = () => {
             quantity: 1
         });
         setBookingStep(1);
+        setError(null);
     };
 
     const handleOrderTypeChange = (type: 'delivery' | 'pickup' | 'booking') => {
@@ -149,25 +153,71 @@ const CustomerMenu: React.FC = () => {
         });
 
         if (type === 'booking') {
-            fetchAvailableTables();
+            setBookingStep(1);
+            setBookingData({
+                ...bookingData,
+                customer_name: '',
+                customer_phone: '',
+                table_id: 0
+            });
         }
     };
 
-    const handleBookingNext = () => {
-        if (bookingStep < 3) {
-            setBookingStep(bookingStep + 1);
+    const handleBookingNext = async () => {
+        // Validate current step before proceeding
+        if (bookingStep === 1) {
+            // Validate customer info
+            if (!bookingData.customer_name.trim() || !bookingData.customer_phone.trim()) {
+                setError('Please provide your name and phone number');
+                return;
+            }
+            
+            // Validate number of people
+            if (bookingData.number_of_people < 1) {
+                setError('Number of people must be at least 1');
+                return;
+            }
+            
+            try {
+                setLoading(true);
+                await fetchAvailableTables();
+                setBookingStep(2);
+                setError(null);
+            } catch (err) {
+                setError('Failed to fetch available tables');
+            } finally {
+                setLoading(false);
+            }
+        } else if (bookingStep === 2) {
+            // Validate table selection
+            if (!bookingData.table_id) {
+                setError('Please select a table');
+                return;
+            }
+            setBookingStep(3);
+            setError(null);
         }
     };
 
     const handleBookingPrev = () => {
         if (bookingStep > 1) {
             setBookingStep(bookingStep - 1);
+            setError(null);
         }
     };
 
     const handleOrderSubmit = async () => {
         try {
             setLoading(true);
+            setError(null);
+
+            // Validate inputs based on order type
+            if (orderType !== 'booking') {
+                if (!orderData.customer_name.trim() || !orderData.customer_phone.trim()) {
+                    setError('Please provide your name and phone number');
+                    return;
+                }
+            }
 
             if (orderType === 'booking' && !bookingData.table_id) {
                 setError('Please select a table for booking');
@@ -179,14 +229,18 @@ const CustomerMenu: React.FC = () => {
                 ...orderData,
                 customer_name: orderData.customer_name || bookingData.customer_name,
                 customer_phone: orderData.customer_phone || bookingData.customer_phone,
-                table_number: orderType === 'booking' ? bookingData.table_id.toString() : undefined
+                table_number: orderType === 'booking' ? availableTables.find(t => t.id === bookingData.table_id)?.number : undefined
             };
 
             await mainAxios.post('/orders/add', orderPayload);
 
             // If booking, also book the table
             if (orderType === 'booking') {
-                await mainAxios.post('/tables/book', bookingData);
+                await mainAxios.post('/tables/book', {
+                    ...bookingData,
+                    customer_name: bookingData.customer_name,
+                    customer_phone: bookingData.customer_phone
+                });
                 setBookingSuccess(true);
             } else {
                 setOrderSuccess(true);
@@ -208,8 +262,9 @@ const CustomerMenu: React.FC = () => {
                 booking_duration: 60,
             });
 
-        } catch (err) {
-            setError('Failed to place order');
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to place order';
+            setError(errorMessage);
             console.error('Error placing order:', err);
         } finally {
             setLoading(false);
@@ -234,6 +289,31 @@ const CustomerMenu: React.FC = () => {
                 return (
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium text-gray-900">Booking Details</h3>
+                        
+                        {/* Customer Information for Booking */}
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={bookingData.customer_name}
+                                    onChange={(e) => setBookingData({ ...bookingData, customer_name: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="Enter your name"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                <input
+                                    type="tel"
+                                    value={bookingData.customer_phone}
+                                    onChange={(e) => setBookingData({ ...bookingData, customer_phone: e.target.value })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="Enter your phone number"
+                                />
+                            </div>
+                        </div>
+                        
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Number of People</label>
@@ -241,7 +321,7 @@ const CustomerMenu: React.FC = () => {
                                     type="number"
                                     min="1"
                                     value={bookingData.number_of_people}
-                                    onChange={(e) => setBookingData({ ...bookingData, number_of_people: parseInt(e.target.value) })}
+                                    onChange={(e) => setBookingData({ ...bookingData, number_of_people: parseInt(e.target.value) || 1 })}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                 />
                             </div>
@@ -261,9 +341,10 @@ const CustomerMenu: React.FC = () => {
                         </div>
                         <button
                             onClick={handleBookingNext}
-                            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            disabled={loading}
+                            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                         >
-                            Next <ChevronRight size={18} />
+                            {loading ? 'Loading...' : 'Next'} <ChevronRight size={18} />
                         </button>
                     </div>
                 );
@@ -276,28 +357,47 @@ const CustomerMenu: React.FC = () => {
                                 <ChevronLeft size={20} />
                             </button>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto">
-                            {availableTables.map((table) => (
+                        
+                        {loading ? (
+                            <div className="text-center py-8">
+                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                                <p className="mt-2 text-gray-600">Loading available tables...</p>
+                            </div>
+                        ) : availableTables.length === 0 ? (
+                            <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                <p className="text-gray-600">No tables available at the moment</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                                    {availableTables.map((table) => (
+                                        <button
+                                            key={table.id}
+                                            onClick={() => setBookingData({ ...bookingData, table_id: table.id })}
+                                            className={`p-4 border-2 rounded-lg text-left transition-all ${bookingData.table_id === table.id
+                                                    ? 'border-green-500 bg-green-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            <div className="font-medium">Table {table.number}</div>
+                                            <div className="text-sm text-gray-500">Capacity: {table.capacity}</div>
+                                            {bookingData.number_of_people > table.capacity && (
+                                                <div className="text-xs text-red-500 mt-1">
+                                                    Warning: Exceeds table capacity
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
                                 <button
-                                    key={table.id}
-                                    onClick={() => setBookingData({ ...bookingData, table_id: table.id })}
-                                    className={`p-4 border-2 rounded-lg text-left transition-all ${bookingData.table_id === table.id
-                                            ? 'border-green-500 bg-green-50'
-                                            : 'border-gray-200 hover:border-gray-300'
-                                        }`}
+                                    onClick={handleBookingNext}
+                                    disabled={!bookingData.table_id}
+                                    className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
-                                    <div className="font-medium">Table {table.number}</div>
-                                    <div className="text-sm text-gray-500">Capacity: {table.capacity}</div>
+                                    Next <ChevronRight size={18} />
                                 </button>
-                            ))}
-                        </div>
-                        <button
-                            onClick={handleBookingNext}
-                            disabled={!bookingData.table_id}
-                            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            Next <ChevronRight size={18} />
-                        </button>
+                            </>
+                        )}
                     </div>
                 );
             case 3:
@@ -311,9 +411,17 @@ const CustomerMenu: React.FC = () => {
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                             <div className="flex justify-between">
+                                <span>Customer:</span>
+                                <span className="font-medium">{bookingData.customer_name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Phone:</span>
+                                <span className="font-medium">{bookingData.customer_phone}</span>
+                            </div>
+                            <div className="flex justify-between">
                                 <span>Table:</span>
                                 <span className="font-medium">
-                                    {availableTables.find(t => t.id === bookingData.table_id)?.number}
+                                    Table {availableTables.find(t => t.id === bookingData.table_id)?.number}
                                 </span>
                             </div>
                             <div className="flex justify-between">
@@ -553,7 +661,7 @@ const CustomerMenu: React.FC = () => {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-hidden"
+                                className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
                             >
                                 <div className="p-6">
                                     <div className="flex justify-between items-center mb-6">
@@ -563,6 +671,8 @@ const CustomerMenu: React.FC = () => {
                                                 setShowOrderModal(false);
                                                 setOrderSuccess(false);
                                                 setBookingSuccess(false);
+                                                setBookingStep(1);
+                                                setError(null);
                                             }}
                                             className="text-gray-500 hover:text-gray-700"
                                         >
@@ -641,7 +751,7 @@ const CustomerMenu: React.FC = () => {
                                                                     type="number"
                                                                     min="1"
                                                                     value={orderData.quantity}
-                                                                    onChange={(e) => setOrderData({ ...orderData, quantity: parseInt(e.target.value) })}
+                                                                    onChange={(e) => setOrderData({ ...orderData, quantity: parseInt(e.target.value) || 1 })}
                                                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                                                 />
                                                             </div>
