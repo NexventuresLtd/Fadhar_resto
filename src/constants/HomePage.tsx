@@ -1,4 +1,5 @@
 import { Truck, Utensils, Wallet } from "lucide-react";
+
 import mainAxios from "../Instance/mainAxios";
 
 export interface Dish {
@@ -37,7 +38,20 @@ export const fetchPopularDishes = async (): Promise<Dish[]> => {
   }
 };
 
- 
+  export const menuItems = [
+    { name: "Premium Burger", price: "RWF 1127.80", rating: 4.8, image: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" },
+    { name: "Chicken Pizza", price: "RWF 1124.20", rating: 4.9, image: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" },
+    { name: "Chicken Fry", price: "RWF 1125.00", rating: 4.7, image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" },
+    { name: "Club Sandwich", price: "RWF 1126.30", rating: 4.6, image: "https://images.unsplash.com/photo-1502741224143-90386d7f8c82?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" },
+    { name: "Taco Trail", price: "RWF 1123.63", rating: 4.8, image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" },
+    { name: "Noodle Ramen", price: "RWF 1126.50", rating: 4.9, image: "https://images.unsplash.com/photo-1610878665011-0d2d5d16f9a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" }
+  ];
+
+  export const categories = [
+    { name: "Burgers", icon: "🍔", color: "from-green-400 to-green-400" },
+    { name: "Pizza", icon: "🍕", color: "from-green-400 to-green-400" },
+    { name: "Fried Items", icon: "🍗", color: "from-green-400 to-green-400" }
+  ];
   export  const features = [
     {
       id: 1,
