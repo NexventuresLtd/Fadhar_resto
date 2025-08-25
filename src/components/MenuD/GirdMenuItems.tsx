@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, MapPin, Calendar, MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { ShoppingCart, MapPin, Calendar, MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 
 interface MenuItem {
@@ -38,6 +38,12 @@ interface BookingData {
     booking_duration: number;
 }
 
+interface PaymentData {
+    order_id: number;
+    amount: number;
+    phone: string;
+}
+
 const CustomerMenu: React.FC = () => {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
@@ -69,7 +75,13 @@ const CustomerMenu: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showFilters, setShowFilters] = useState(false);
-    console.log(categories)
+    const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
+    const [paymentStep, setPaymentStep] = useState<'order' | 'payment'>('order');
+    const [paymentLoading, setPaymentLoading] = useState(false);
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
+    const [paymentReference, setPaymentReference] = useState<string>('');
+    // const [success, setSuccess] = useState<string>('');
+
     // Fetch categories and menu items on component mount
     useEffect(() => {
         fetchCategories();
@@ -133,6 +145,65 @@ const CustomerMenu: React.FC = () => {
         }
     };
 
+    const initiatePayment = async (orderId: number, amount: number, phone: string) => {
+        try {
+            setPaymentLoading(true);
+            setError(null);
+            
+            const response = await mainAxios.post(`/payments/initiate/${orderId}`, {
+                amount: amount,
+                phone: phone
+            });
+
+            setPaymentReference(response.data.reference_id);
+            setPaymentSuccess(true);
+            
+            // Start polling for payment status
+            checkPaymentStatusPeriodically(response.data.reference_id);
+            
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.detail || 'Failed to initiate payment';
+            setError(errorMessage);
+            console.error('Error initiating payment:', err);
+        } finally {
+            setPaymentLoading(false);
+        }
+    };
+
+    const checkPaymentStatusPeriodically = async (referenceId: string) => {
+        let attempts = 0;
+        const maxAttempts = 20; // Check for 5 minutes (20 * 15 seconds)
+        
+        const checkStatus = async () => {
+            if (attempts >= maxAttempts) {
+                console.log('Payment status check timeout');
+                return;
+            }
+            
+            try {
+                const response = await mainAxios.get(`/payments/status/${referenceId}`);
+                const status = response.data.status;
+                
+                if (status === 'completed') {
+                    setError('Payment completed successfully!');
+                    // You might want to update the UI to show payment completion
+                } else if (status === 'failed') {
+                    setError('Payment failed. Please try again.');
+                } else {
+                    // Continue polling if still pending
+                    attempts++;
+                    setTimeout(checkStatus, 15000); // Check every 15 seconds
+                }
+            } catch (err) {
+                console.error('Error checking payment status:', err);
+                attempts++;
+                setTimeout(checkStatus, 15000);
+            }
+        };
+        
+        setTimeout(checkStatus, 15000);
+    };
+
     const handleItemClick = (item: MenuItem) => {
         setSelectedItem(item);
         setShowOrderModal(true);
@@ -142,6 +213,10 @@ const CustomerMenu: React.FC = () => {
             quantity: 1
         });
         setBookingStep(1);
+        setPaymentStep('order');
+        setPaymentSuccess(false);
+        setPaymentReference('');
+        setCreatedOrderId(null);
         setError(null);
     };
 
@@ -232,7 +307,9 @@ const CustomerMenu: React.FC = () => {
                 table_number: orderType === 'booking' ? availableTables.find(t => t.id === bookingData.table_id)?.id : undefined
             };
 
-            await mainAxios.post('/orders/add', orderPayload);
+            const orderResponse = await mainAxios.post('/orders/add', orderPayload);
+            const orderId = orderResponse.data.id;
+            setCreatedOrderId(orderId);
 
             // If booking, also book the table
             if (orderType === 'booking') {
@@ -246,21 +323,8 @@ const CustomerMenu: React.FC = () => {
                 setOrderSuccess(true);
             }
 
-            // Reset forms
-            setOrderData({
-                customer_name: '',
-                customer_phone: '',
-                order_type: 'delivery',
-                item_id: 0,
-                quantity: 1,
-            });
-            setBookingData({
-                table_id: 0,
-                customer_name: '',
-                customer_phone: '',
-                number_of_people: 1,
-                booking_duration: 60,
-            });
+            // Move to payment step
+            setPaymentStep('payment');
 
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Failed to place order';
@@ -269,6 +333,15 @@ const CustomerMenu: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePaymentInitiation = async () => {
+        if (!createdOrderId || !selectedItem) return;
+
+        const phone = orderType === 'booking' ? bookingData.customer_phone : orderData.customer_phone;
+        const amount = selectedItem.price * orderData.quantity;
+
+        await initiatePayment(createdOrderId, amount, phone);
     };
 
     const handleWhatsAppInquiry = () => {
@@ -298,7 +371,7 @@ const CustomerMenu: React.FC = () => {
                                     type="text"
                                     value={bookingData.customer_name}
                                     onChange={(e) => setBookingData({ ...bookingData, customer_name: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     placeholder="Enter your name"
                                 />
                             </div>
@@ -308,7 +381,7 @@ const CustomerMenu: React.FC = () => {
                                     type="tel"
                                     value={bookingData.customer_phone}
                                     onChange={(e) => setBookingData({ ...bookingData, customer_phone: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                     placeholder="Enter your phone number"
                                 />
                             </div>
@@ -322,7 +395,7 @@ const CustomerMenu: React.FC = () => {
                                     min="1"
                                     value={bookingData.number_of_people}
                                     onChange={(e) => setBookingData({ ...bookingData, number_of_people: parseInt(e.target.value) || 1 })}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 />
                             </div>
                             <div>
@@ -330,7 +403,7 @@ const CustomerMenu: React.FC = () => {
                                 <select
                                     value={bookingData.booking_duration}
                                     onChange={(e) => setBookingData({ ...bookingData, booking_duration: parseInt(e.target.value) })}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 >
                                     <option value={30}>30 minutes</option>
                                     <option value={60}>1 hour</option>
@@ -342,7 +415,7 @@ const CustomerMenu: React.FC = () => {
                         <button
                             onClick={handleBookingNext}
                             disabled={loading}
-                            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             {loading ? 'Loading...' : 'Next'} <ChevronRight size={18} />
                         </button>
@@ -360,7 +433,7 @@ const CustomerMenu: React.FC = () => {
 
                         {loading ? (
                             <div className="text-center py-8">
-                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
                                 <p className="mt-2 text-gray-600">Loading available tables...</p>
                             </div>
                         ) : availableTables.length === 0 ? (
@@ -375,7 +448,7 @@ const CustomerMenu: React.FC = () => {
                                             key={table.id}
                                             onClick={() => setBookingData({ ...bookingData, table_id: table.id })}
                                             className={`p-4 border-2 rounded-lg text-left transition-all ${bookingData.table_id === table.id
-                                                ? 'border-green-500 bg-green-50'
+                                                ? 'border-orange-500 bg-orange-50'
                                                 : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
@@ -392,7 +465,7 @@ const CustomerMenu: React.FC = () => {
                                 <button
                                     onClick={handleBookingNext}
                                     disabled={!bookingData.table_id}
-                                    className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     Next <ChevronRight size={18} />
                                 </button>
@@ -449,13 +522,87 @@ const CustomerMenu: React.FC = () => {
                         <button
                             onClick={handleOrderSubmit}
                             disabled={loading}
-                            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+                            className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Processing...' : 'Confirm Booking'}
                         </button>
                     </div>
                 );
         }
+    };
+
+    const renderPaymentStep = () => {
+        if (!selectedItem || !createdOrderId) return null;
+
+        const totalAmount = selectedItem.price * orderData.quantity;
+        const phone = orderType === 'booking' ? bookingData.customer_phone : orderData.customer_phone;
+
+        return (
+            <div className="space-y-6">
+                <div className="text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-orange-100 rounded-full flex items-center justify-center">
+                        <CreditCard size={32} className="text-orange-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Complete Payment</h3>
+                    <p className="text-gray-600 mb-4">Order #{createdOrderId} - Rwf {totalAmount.toLocaleString()}</p>
+                </div>
+
+                {paymentSuccess ? (
+                    <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                        <div className="flex items-center gap-3 mb-2">
+                            <Check size={20} className="text-green-600" />
+                            <span className="font-medium text-green-800">Payment Initiated Successfully!</span>
+                        </div>
+                        <p className="text-green-700 text-sm mb-3">
+                            Reference ID: <span className="font-mono">{paymentReference}</span>
+                        </p>
+                        <p className="text-green-700 text-sm">
+                            Please check your phone to complete the MoMo payment. We'll notify you when payment is confirmed.
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                            <h4 className="font-medium text-blue-800 mb-2">Payment Instructions</h4>
+                            <p className="text-blue-700 text-sm">
+                                You will receive a payment request on your phone number: <strong>{phone}</strong>
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={handlePaymentInitiation}
+                            disabled={paymentLoading}
+                            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            {paymentLoading ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    Initiating Payment...
+                                </>
+                            ) : (
+                                <>
+                                    <DollarSign size={20} />
+                                    Pay with MoMo
+                                </>
+                            )}
+                        </button>
+                    </>
+                )}
+
+                <div className="text-center">
+                    <p className="text-gray-600 mb-4">
+                        Need assistance? Contact us via WhatsApp:
+                    </p>
+                    <button
+                        onClick={handleWhatsAppInquiry}
+                        className="flex items-center justify-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg mx-auto hover:bg-orange-700 transition-colors"
+                    >
+                        <MessageCircle size={18} />
+                        <span>Chat on WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -500,7 +647,7 @@ const CustomerMenu: React.FC = () => {
                             placeholder="Search menu items..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         />
                     </div>
 
@@ -557,13 +704,13 @@ const CustomerMenu: React.FC = () => {
                     <div className="flex border border-gray-200 rounded-lg overflow-hidden">
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={`p-3 ${viewMode === 'grid' ? 'bg-green-600 text-white' : 'text-gray-700 hover:bg-gray-50'} transition-colors`}
+                            className={`p-3 ${viewMode === 'grid' ? 'bg-orange-600 text-white' : 'text-gray-700 hover:bg-gray-50'} transition-colors`}
                         >
                             <Grid size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-3 ${viewMode === 'list' ? 'bg-green-600 text-white' : 'text-gray-700 hover:bg-gray-50'} transition-colors`}
+                            className={`p-3 ${viewMode === 'list' ? 'bg-orange-600 text-white' : 'text-gray-700 hover:bg-gray-50'} transition-colors`}
                         >
                             <List size={18} />
                         </button>
@@ -574,7 +721,7 @@ const CustomerMenu: React.FC = () => {
                 <AnimatePresence mode="wait">
                     {loading ? (
                         <div className="text-center py-12">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
                         </div>
                     ) : viewMode === 'grid' ? (
                         <motion.div
@@ -588,7 +735,7 @@ const CustomerMenu: React.FC = () => {
                                 <motion.div
                                     key={item.id}
                                     whileHover={{ y: -4 }}
-                                    className="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-green-300 transition-colors"
+                                    className="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
                                     onClick={() => handleItemClick(item)}
                                 >
                                     <div className="h-48 overflow-hidden">
@@ -599,13 +746,13 @@ const CustomerMenu: React.FC = () => {
                                         />
                                     </div>
                                     <div className="p-4">
-                                        <div className="text-xs text-green-600 font-medium mb-1">{item.subcategory_name}</div>
+                                        <div className="text-xs text-orange-600 font-medium mb-1">{item.subcategory_name}</div>
                                         <h3 className="font-semibold text-lg text-gray-900 mb-2">{item.name}</h3>
                                         <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
                                         <div className="flex justify-between items-center">
-                                            <span className="font-bold text-green-600">Rwf {item.price.toLocaleString()}</span>
-                                            <div className="p-2 bg-green-50 rounded-full">
-                                                <ShoppingCart size={16} className="text-green-600" />
+                                            <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
+                                            <div className="p-2 bg-orange-50 rounded-full">
+                                                <ShoppingCart size={16} className="text-orange-600" />
                                             </div>
                                         </div>
                                     </div>
@@ -624,7 +771,7 @@ const CustomerMenu: React.FC = () => {
                                 <motion.div
                                     key={item.id}
                                     whileHover={{ x: 4 }}
-                                    className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-green-300 transition-colors"
+                                    className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-orange-300 transition-colors"
                                     onClick={() => handleItemClick(item)}
                                 >
                                     <div className="flex gap-4">
@@ -636,13 +783,13 @@ const CustomerMenu: React.FC = () => {
                                             />
                                         </div>
                                         <div className="flex-1">
-                                            <div className="text-xs text-green-600 font-medium mb-1">{item.subcategory_name}</div>
+                                            <div className="text-xs text-orange-600 font-medium mb-1">{item.subcategory_name}</div>
                                             <h3 className="font-semibold text-lg text-gray-900 mb-2">{item.name}</h3>
                                             <p className="text-gray-600 text-sm mb-2">{item.description}</p>
                                             <div className="flex justify-between items-center">
-                                                <span className="font-bold text-green-600">Rwf {item.price.toLocaleString()}</span>
-                                                <div className="p-2 bg-green-50 rounded-full">
-                                                    <ShoppingCart size={16} className="text-green-600" />
+                                                <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
+                                                <div className="p-2 bg-orange-50 rounded-full">
+                                                    <ShoppingCart size={16} className="text-orange-600" />
                                                 </div>
                                             </div>
                                         </div>
@@ -663,17 +810,18 @@ const CustomerMenu: React.FC = () => {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
                             >
-
                                 <div className="p-6">
-
                                     <div className="flex justify-between items-center mb-6">
-                                        <h2 className="text-xl font-semibold text-gray-900">Order {selectedItem.name}</h2>
+                                        <h2 className="text-xl font-semibold text-gray-900">
+                                            {paymentStep === 'payment' ? 'Complete Payment' : `Order ${selectedItem.name}`}
+                                        </h2>
                                         <button
                                             onClick={() => {
                                                 setShowOrderModal(false);
                                                 setOrderSuccess(false);
                                                 setBookingSuccess(false);
                                                 setBookingStep(1);
+                                                setPaymentStep('order');
                                                 setError(null);
                                             }}
                                             className="text-gray-500 hover:text-gray-700"
@@ -681,6 +829,7 @@ const CustomerMenu: React.FC = () => {
                                             <X size={24} />
                                         </button>
                                     </div>
+
                                     {/* Error Message */}
                                     <AnimatePresence>
                                         {error && (
@@ -697,7 +846,10 @@ const CustomerMenu: React.FC = () => {
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
-                                    {!orderSuccess && !bookingSuccess ? (
+
+                                    {paymentStep === 'payment' ? (
+                                        renderPaymentStep()
+                                    ) : !orderSuccess && !bookingSuccess ? (
                                         <>
                                             {/* Order Type Selection */}
                                             <div className="mb-6">
@@ -706,7 +858,7 @@ const CustomerMenu: React.FC = () => {
                                                     <button
                                                         onClick={() => handleOrderTypeChange('delivery')}
                                                         className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'delivery'
-                                                            ? 'bg-green-600 text-white'
+                                                            ? 'bg-orange-600 text-white'
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
@@ -716,7 +868,7 @@ const CustomerMenu: React.FC = () => {
                                                     <button
                                                         onClick={() => handleOrderTypeChange('pickup')}
                                                         className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'pickup'
-                                                            ? 'bg-green-600 text-white'
+                                                            ? 'bg-orange-600 text-white'
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
@@ -726,7 +878,7 @@ const CustomerMenu: React.FC = () => {
                                                     <button
                                                         onClick={() => handleOrderTypeChange('booking')}
                                                         className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'booking'
-                                                            ? 'bg-green-600 text-white'
+                                                            ? 'bg-orange-600 text-white'
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
@@ -748,7 +900,7 @@ const CustomerMenu: React.FC = () => {
                                                                     type="text"
                                                                     value={orderData.customer_name}
                                                                     onChange={(e) => setOrderData({ ...orderData, customer_name: e.target.value })}
-                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                                                     placeholder="Enter your name"
                                                                 />
                                                             </div>
@@ -758,7 +910,7 @@ const CustomerMenu: React.FC = () => {
                                                                     type="tel"
                                                                     value={orderData.customer_phone}
                                                                     onChange={(e) => setOrderData({ ...orderData, customer_phone: e.target.value })}
-                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                                                     placeholder="Enter your phone number"
                                                                 />
                                                             </div>
@@ -769,7 +921,7 @@ const CustomerMenu: React.FC = () => {
                                                                     min="1"
                                                                     value={orderData.quantity}
                                                                     onChange={(e) => setOrderData({ ...orderData, quantity: parseInt(e.target.value) || 1 })}
-                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                                                 />
                                                             </div>
                                                         </div>
@@ -778,7 +930,7 @@ const CustomerMenu: React.FC = () => {
                                                     <button
                                                         onClick={handleOrderSubmit}
                                                         disabled={loading}
-                                                        className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+                                                        className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50"
                                                     >
                                                         {loading ? 'Processing...' : `Place Order - Rwf ${(selectedItem.price * orderData.quantity).toLocaleString()}`}
                                                     </button>
@@ -790,41 +942,24 @@ const CustomerMenu: React.FC = () => {
                                     ) : (
                                         /* Success Message */
                                         <div className="text-center py-6">
-                                            <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                                                <Check size={32} className="text-green-600" />
+                                            <div className="w-16 h-16 mx-auto mb-4 bg-orange-100 rounded-full flex items-center justify-center">
+                                                <Check size={32} className="text-orange-600" />
                                             </div>
                                             <h3 className="text-xl font-semibold text-gray-900 mb-2">
                                                 {orderType === 'booking' ? 'Table Booked Successfully!' : 'Order Placed Successfully!'}
                                             </h3>
                                             <p className="text-gray-600 mb-6">
                                                 {orderType === 'booking'
-                                                    ? 'Your table has been reserved. Please arrive on time.'
-                                                    : 'Your order has been received and is being processed.'}
+                                                    ? 'Your table has been reserved. Please proceed to payment.'
+                                                    : 'Your order has been received. Please proceed to payment.'}
                                             </p>
 
-                                            {/* Payment Instructions */}
-                                            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6 text-left">
-                                                <h4 className="font-medium text-yellow-800 mb-2">Payment Instructions:</h4>
-                                                <p className="text-yellow-700 text-sm mb-2">
-                                                    To complete your {orderType === 'booking' ? 'booking' : 'order'}, please make payment via:
-                                                </p>
-                                                <div className="bg-gray-100 p-3 rounded-lg font-mono text-sm mb-3">
-                                                    *182*8*1*00000*{(selectedItem.price * orderData.quantity)}#
-                                                </div>
-                                                <p className="text-yellow-700 text-xs">
-                                                    You will see the account name: <strong>Fadr Business Group</strong>
-                                                </p>
-                                            </div>
-
-                                            <p className="text-gray-600 mb-4">
-                                                Need assistance? Contact us via WhatsApp:
-                                            </p>
                                             <button
-                                                onClick={handleWhatsAppInquiry}
-                                                className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg mx-auto hover:bg-green-700 transition-colors"
+                                                onClick={() => setPaymentStep('payment')}
+                                                className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                                             >
-                                                <MessageCircle size={18} />
-                                                <span>Chat on WhatsApp</span>
+                                                <CreditCard size={20} />
+                                                Proceed to Payment
                                             </button>
                                         </div>
                                     )}
