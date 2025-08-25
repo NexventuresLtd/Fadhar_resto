@@ -7,6 +7,7 @@ import MenuItemManagement from '../components/Dashboard/MenuManagement/MenuItems
 import TableManagement from '../components/Dashboard/TableManagement/TableManage';
 import Dashboard from '../components/Dashboard/MainCountsDash';
 import OrderManagement from '../components/Dashboard/OrderManagement/OderManagement';
+import PaymentManagement from '../components/Dashboard/payment/paymentManage';
 
 
 
@@ -49,6 +50,7 @@ const FadharAdminDashboard: React.FC = () => {
                     {activeItem == "menu" && <MenuItemManagement />}
                     {activeItem == "orders" && <OrderManagement />}
                     {activeItem == "tables" && <TableManagement />}
+                    {activeItem == "payments" && <PaymentManagement/>}
                     {/** Sub Category Management */}
                     {activeItem == "categories" && <>
                         {activeSubItem == "" && <><CategoryManagement /></>}
