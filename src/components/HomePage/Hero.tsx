@@ -4,6 +4,7 @@ import { features } from '../../constants/HomePage';
 import { fadeInUp, staggerContainer } from '../../hooks/HomePage';
 import { useEffect, useState } from 'react';
 import { fetchPopularDishes } from '../../constants/HomePage';
+import { contactMe } from '../../app/WhatsappMessage';
 
 export default function Hero() {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -37,31 +38,31 @@ export default function Hero() {
     // Show loading state
     if (loading) {
         return (
-            <section className="relative overflow-hidden bg-gradient-to-br from-green-200 to-green-200 pt-16">
+            <section className="relative overflow-hidden bg-gradient-to-br from-green-100 to-red-100 pt-16">
                 <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         {/* Left Content Skeleton */}
                         <div className="space-y-8">
                             {/* Title Skeleton */}
                             <div className="space-y-4">
-                                <div className="h-12 bg-green-100 rounded-full animate-pulse w-4/5"></div>
-                                <div className="h-12 bg-green-100 rounded-full animate-pulse w-3/4"></div>
-                                <div className="h-12 bg-green-100 rounded-full animate-pulse w-2/3"></div>
+                                <div className="h-12 bg-green-200 rounded-full animate-pulse w-4/5"></div>
+                                <div className="h-12 bg-green-200 rounded-full animate-pulse w-3/4"></div>
+                                <div className="h-12 bg-green-200 rounded-full animate-pulse w-2/3"></div>
                             </div>
-                            
+
                             {/* Icon with text Skeleton */}
                             <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-green-100 rounded-full animate-pulse"></div>
+                                <div className="w-12 h-12 bg-green-200 rounded-full animate-pulse"></div>
                                 <div className="space-y-2">
-                                    <div className="h-4 bg-green-100 rounded-full animate-pulse w-40"></div>
-                                    <div className="h-3 bg-green-100 rounded-full animate-pulse w-32"></div>
+                                    <div className="h-4 bg-green-200 rounded-full animate-pulse w-40"></div>
+                                    <div className="h-3 bg-green-200 rounded-full animate-pulse w-32"></div>
                                 </div>
                             </div>
-                            
+
                             {/* Buttons Skeleton */}
                             <div className="flex flex-row gap-4 pt-4">
-                                <div className="h-12 bg-green-100 rounded-full animate-pulse w-32"></div>
-                                <div className="h-12 bg-green-100 rounded-full animate-pulse w-32"></div>
+                                <div className="h-12 bg-orange-500 rounded-full animate-pulse w-32"></div>
+                                <div className="h-12 bg-white border-2 border-green-500 rounded-full animate-pulse w-32"></div>
                             </div>
                         </div>
 
@@ -69,25 +70,25 @@ export default function Hero() {
                         <div className="relative">
                             <div className="relative w-full h-96 flex items-center justify-center">
                                 {/* Main image skeleton */}
-                                <div className="w-full h-96 bg-green-100 rounded-3xl animate-pulse"></div>
-                                
+                                <div className="w-full h-96 bg-orange-200 rounded-3xl animate-pulse"></div>
+
                                 {/* Navigation buttons skeleton */}
                                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-                                    <div className="p-3 rounded-full bg-green-100 animate-pulse">
+                                    <div className="p-3 rounded-full bg-orange-200 animate-pulse">
                                         <div className="w-6 h-6"></div>
                                     </div>
                                 </div>
                                 <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
-                                    <div className="p-3 rounded-full bg-green-100 animate-pulse">
+                                    <div className="p-3 rounded-full bg-orange-200 animate-pulse">
                                         <div className="w-6 h-6"></div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Dish info skeleton */}
                                 <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4">
-                                    <div className="h-6 bg-green-100 rounded-full animate-pulse mb-2 w-3/4"></div>
-                                    <div className="h-4 bg-green-100 rounded-full animate-pulse mb-3 w-full"></div>
-                                    <div className="h-4 bg-green-100 rounded-full animate-pulse w-1/4"></div>
+                                    <div className="h-6 bg-orange-200 rounded-full animate-pulse mb-2 w-3/4"></div>
+                                    <div className="h-4 bg-orange-200 rounded-full animate-pulse mb-3 w-full"></div>
+                                    <div className="h-4 bg-green-500 rounded-full animate-pulse w-1/4"></div>
                                 </div>
                             </div>
                         </div>
@@ -99,10 +100,10 @@ export default function Hero() {
                     <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid md:grid-cols-3 gap-8">
                             {[1, 2, 3].map((id) => (
-                                <div key={id} className="text-center p-6 bg-green-100 rounded-2xl border border-gray-200">
-                                    <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-2xl animate-pulse"></div>
-                                    <div className="h-5 bg-green-100 rounded-full animate-pulse mb-2 w-3/4 mx-auto"></div>
-                                    <div className="h-4 bg-green-100 rounded-full animate-pulse w-full mx-auto"></div>
+                                <div key={id} className="text-center p-6 bg-orange-50 rounded-2xl border border-orange-200">
+                                    <div className="w-16 h-16 mx-auto mb-4 bg-orange-200 rounded-2xl animate-pulse"></div>
+                                    <div className="h-5 bg-orange-200 rounded-full animate-pulse mb-2 w-3/4 mx-auto"></div>
+                                    <div className="h-4 bg-orange-200 rounded-full animate-pulse w-full mx-auto"></div>
                                 </div>
                             ))}
                         </div>
@@ -114,7 +115,7 @@ export default function Hero() {
 
     if (popularDishes.length === 0) {
         return (
-            <section className="relative overflow-hidden bg-gradient-to-br from-green-200 to-green-200 pt-16">
+            <section className="relative overflow-hidden bg-gradient-to-br from-green-100 to-red-100 pt-16">
                 <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="text-center">
                         <p>No dishes available</p>
@@ -127,7 +128,7 @@ export default function Hero() {
     return (
         <>
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-green-200 to-green-200 pt-16">
+            <section className="relative overflow-hidden bg-gradient-to-br from-green-100 to-red-100 pt-16">
                 <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         {/* Left Content */}
@@ -142,15 +143,15 @@ export default function Hero() {
                                 className="text-3xl lg:text-6xl font-bold text-gray-800 leading-tight"
                             >
                                 All Fast Food is<br />
-                                Available at <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-500">Fadhar's</span>
+                                Available at <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Fadhar's</span>
                             </motion.h1>
 
                             <motion.div
                                 variants={fadeInUp}
                                 className="flex items-center space-x-4 text-gray-600"
                             >
-                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                    <Utensils className="w-6 h-6 text-green-500" />
+                                <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center">
+                                    <Utensils className="w-6 h-6 text-orange-600" />
                                 </div>
                                 <div>
                                     <p className="font-medium">We Are Just a Click Away When You</p>
@@ -165,14 +166,15 @@ export default function Hero() {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-gradient-to-r cursor-pointer from-green-500 to-green-500 text-white px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold transition-all flex items-center justify-center space-x-2"
+                                    className="bg-gradient-to-r cursor-pointer from-orange-500 to-red-600 text-white px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold transition-all flex items-center justify-center space-x-2"
                                 >
                                     <span>Order Now</span>
                                 </motion.button>
                                 <motion.button
+                                    onClick={() => contactMe()}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="border-2 cursor-pointer border-black text-gray-700 px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold hover:border-green-500 hover:text-green-500 transition-all"
+                                    className="border-2 cursor-pointer border-green-500 text-gray-700 px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold hover:bg-green-50 transition-all"
                                 >
                                     Contact Us
                                 </motion.button>
@@ -237,7 +239,7 @@ export default function Hero() {
                                         {popularDishes[currentSlide].description}
                                     </p>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-bold text-green-500">{popularDishes[currentSlide].price}</span>
+                                        <span className="text-lg font-bold text-green-600">{popularDishes[currentSlide].price}</span>
                                     </div>
                                 </motion.div>
                             </div>

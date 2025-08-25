@@ -140,6 +140,7 @@ const PaymentManagement: React.FC = () => {
       const response = await mainAxios.post(`/payments/notify/${notificationData.reference_id}`, {
         message: notificationData.message
       });
+      console.log(response)
 
       setSuccess('Notification sent successfully');
       setNotificationData({ reference_id: '', message: 'Thank you for your payment at Fadhar Restaurant!' });

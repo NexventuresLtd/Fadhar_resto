@@ -9,7 +9,7 @@ import Footer from '../components/Shared/Footer';
 
 const Homepage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-50">
       <NavBar />
       {/* <div className="pt-20"></div> */}
       <Hero />

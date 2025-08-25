@@ -16,11 +16,11 @@ export default function OurMenu() {
                     <div className="flex justify-between items-center mb-12">
                         <div>
                             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-                                <span className="text-green-500">Regular</span> Menu
+                                <span className="text-orange-500">Regular</span> Menu
                             </h2>
                             <p className="text-gray-600 hidden md:block">These Are Our Regular Menu. You Can Order Anything You Like.</p>
                         </div>
-                        <button className="bg-gradient-to-r from-green-500 to-green-500 text-white px-6 py-3 rounded-full font-semibold transition-all text-sm">
+                        <button className="bg-gradient-to-r from-orange-500 to-orange-500 text-white px-6 py-3 rounded-full font-semibold transition-all text-sm">
                             See All
                         </button>
                     </div>
@@ -48,7 +48,7 @@ export default function OurMenu() {
                                         {[...Array(5)].map((_, i) => (
                                             <Star
                                                 key={i}
-                                                className={`w-4 h-4 ${i < Math.floor(item.rating) ? 'text-green-400 fill-current' : 'text-gray-300'}`}
+                                                className={`w-4 h-4 ${i < Math.floor(item.rating) ? 'text-orange-400 fill-current' : 'text-gray-300'}`}
                                             />
                                         ))}
                                         <span className="ml-2 text-sm text-gray-600">({item.rating})</span>
@@ -58,7 +58,7 @@ export default function OurMenu() {
                                         <motion.button
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            className="bg-gradient-to-r from-green-500 to-green-500 text-white px-6 py-2 rounded-full font-medium text-sm transition-all"
+                                            className="bg-gradient-to-r from-orange-500 to-orange-500 text-white px-6 py-2 rounded-full font-medium text-sm transition-all"
                                         >
                                             Order Now
                                         </motion.button>

@@ -38,11 +38,11 @@ interface BookingData {
     booking_duration: number;
 }
 
-interface PaymentData {
-    order_id: number;
-    amount: number;
-    phone: string;
-}
+// interface PaymentData {
+//     order_id: number;
+//     amount: number;
+//     phone: string;
+// }
 
 const CustomerMenu: React.FC = () => {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -87,7 +87,7 @@ const CustomerMenu: React.FC = () => {
         fetchCategories();
         fetchMenuItems();
     }, []);
-
+    console.log(categories)
     // Filter items based on search and category
     useEffect(() => {
         let filtered = menuItems;
@@ -149,18 +149,15 @@ const CustomerMenu: React.FC = () => {
         try {
             setPaymentLoading(true);
             setError(null);
-            
-            const response = await mainAxios.post(`/payments/initiate/${orderId}`, {
-                amount: amount,
-                phone: phone
-            });
+
+            const response = await mainAxios.post(`/payments/initiate/${orderId}?amount=${amount}&phone=${phone}`, {});
 
             setPaymentReference(response.data.reference_id);
             setPaymentSuccess(true);
-            
+
             // Start polling for payment status
             checkPaymentStatusPeriodically(response.data.reference_id);
-            
+
         } catch (err: any) {
             const errorMessage = err.response?.data?.detail || 'Failed to initiate payment';
             setError(errorMessage);
@@ -173,17 +170,17 @@ const CustomerMenu: React.FC = () => {
     const checkPaymentStatusPeriodically = async (referenceId: string) => {
         let attempts = 0;
         const maxAttempts = 20; // Check for 5 minutes (20 * 15 seconds)
-        
+
         const checkStatus = async () => {
             if (attempts >= maxAttempts) {
                 console.log('Payment status check timeout');
                 return;
             }
-            
+
             try {
                 const response = await mainAxios.get(`/payments/status/${referenceId}`);
                 const status = response.data.status;
-                
+
                 if (status === 'completed') {
                     setError('Payment completed successfully!');
                     // You might want to update the UI to show payment completion
@@ -200,7 +197,7 @@ const CustomerMenu: React.FC = () => {
                 setTimeout(checkStatus, 15000);
             }
         };
-        
+
         setTimeout(checkStatus, 15000);
     };
 
@@ -558,6 +555,7 @@ const CustomerMenu: React.FC = () => {
                         </p>
                         <p className="text-green-700 text-sm">
                             Please check your phone to complete the MoMo payment. We'll notify you when payment is confirmed.
+                            Or click <b>*182*7*1#</b> on your mobile
                         </p>
                     </div>
                 ) : (

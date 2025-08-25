@@ -17,20 +17,20 @@ export default function Footer() {
                         <div>
                             <h4 className="text-lg font-semibold text-white mb-4">Menu</h4>
                             <ul className="space-y-2 text-gray-400">
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Burgers</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Pizza</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Fried Items</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Beverages</a></li>
+                                <li><a href="/about" className="hover:text-orange-400 transition-colors">Our Menu</a></li>
+                                <li><a href="/about" className="hover:text-orange-400 transition-colors">Our Order</a></li>
+                                <li><a href="/about" className="hover:text-orange-400 transition-colors"> Deliveries</a></li>
+                                <li><a href="/about" className="hover:text-orange-400 transition-colors">Beverages</a></li>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-lg font-semibold text-white mb-4">Information</h4>
                             <ul className="space-y-2 text-gray-400">
-                                <li><a href="#" className="hover:text-green-400 transition-colors">About Us</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Contact</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Fast Delivery</a></li>
-                                <li><a href="#" className="hover:text-green-400 transition-colors">Terms</a></li>
+                                {/* <li><a href="#" className="hover:text-orange-400 transition-colors">Fadhar's Restorant</a></li> */}
+                                <li><a href="#" className="hover:text-orange-400 transition-colors">pickup service</a></li>
+                                <li><a href="#" className="hover:text-orange-400 transition-colors">Fast Delivery</a></li>
+                                <li><a href="#" className="hover:text-orange-400 transition-colors">table booking</a></li>
                             </ul>
                         </div>
 
@@ -47,7 +47,7 @@ export default function Footer() {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <MapPin className="w-4 h-4" />
-                                    <span>123 Restaurant St, City</span>
+                                    <span>Fadhar's Restaurant ,kigali City</span>
                                 </div>
                             </div>
                         </div>
