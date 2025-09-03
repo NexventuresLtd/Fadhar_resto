@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, Filter, SortAsc, SortDesc, X, Eye, ChevronDown, 
+import {
+  Search, Filter, SortAsc, SortDesc, X, Eye, ChevronDown,
   RefreshCw, Trash2, Edit3, CheckCircle, Clock, AlertCircle,
-  Phone, MessageCircle, ShoppingBag, Utensils, Truck, Coffee
+  Phone, MessageCircle, ShoppingBag, Utensils, Truck, MapPin, Calendar
 } from 'lucide-react';
 import mainAxios from '../../../Instance/mainAxios';
 
@@ -20,6 +20,10 @@ interface Order {
   created_at: string;
   price?: number;
   total?: number;
+  // Additional fields for different order types
+  delivery_address?: string;
+  pickup_time?: string;
+  booking_time?: string;
 }
 
 interface MenuItem {
@@ -47,6 +51,10 @@ interface OrderDetails {
   price?: number;
   total?: number;
   menu_item_details?: MenuItem;
+  // Additional fields for different order types
+  delivery_address?: string;
+  pickup_time?: string;
+  booking_time?: string;
 }
 
 const OrderManagement: React.FC = () => {
@@ -64,7 +72,7 @@ const OrderManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'customer' | 'item' | 'type' | 'date' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [filterBy, setFilterBy] = useState<'all' | 'delivery' | 'dine-in' | 'takeaway'>('all');
+  const [filterBy, setFilterBy] = useState<'all' | 'delivery' | 'pickup' | 'booking'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -117,24 +125,20 @@ const OrderManagement: React.FC = () => {
     return {
       all: orders.length,
       delivery: orders.filter(order => order.order_type === 'delivery').length,
-      dineIn: orders.filter(order => order.order_type === 'dine-in').length,
-      takeaway: orders.filter(order => order.order_type === 'takeaway').length,
-      pending: orders.filter(order => order.status === 'pending').length,
-      preparing: orders.filter(order => order.status === 'preparing').length,
-      completed: orders.filter(order => order.status === 'completed').length,
-      cancelled: orders.filter(order => order.status === 'cancelled').length,
+      pickup: orders.filter(order => order.order_type === 'pickup').length,
+      booking: orders.filter(order => order.order_type === 'booking').length,
     };
   }, [orders]);
 
   // Fetch orders on component mount
   useEffect(() => {
     fetchOrders();
-    
+
     // Simulate skeleton loading for 1.5 seconds
     const timer = setTimeout(() => {
       setSkeletonLoading(false);
     }, 1500);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -153,14 +157,25 @@ const OrderManagement: React.FC = () => {
     }
   };
 
-  const fetchOrderDetails = async (orderId: number) => {
+  const fetchOrderDetails = (orderId: number) => {
     try {
       setDetailLoading(true);
-      const response = await mainAxios.get(`/orders/${orderId}`);
-      setSelectedOrder(response.data);
-      setEditStatus(response.data.status);
-      setShowOrderDetails(true);
-      setError(null);
+      // Find the order in the existing orders array instead of making a backend request
+      const order = orders.find(o => o.id === orderId);
+
+      if (order) {
+        // Convert Order to OrderDetails by adding menu_item_details (if needed)
+        const orderDetails: OrderDetails = {
+          ...order,
+          menu_item_details: undefined // You can populate this if needed from your menu data
+        };
+        setSelectedOrder(orderDetails);
+        setEditStatus(orderDetails.status);
+        setShowOrderDetails(true);
+        setError(null);
+      } else {
+        setError('Order not found');
+      }
     } catch (err) {
       setError('Failed to fetch order details');
       console.error('Error fetching order details:', err);
@@ -248,8 +263,8 @@ const OrderManagement: React.FC = () => {
   const getOrderTypeColor = (type: string) => {
     switch (type) {
       case 'delivery': return 'bg-blue-100 text-blue-800';
-      case 'dine-in': return 'bg-green-100 text-green-800';
-      case 'takeaway': return 'bg-purple-100 text-purple-800';
+      case 'pickup': return 'bg-green-100 text-green-800';
+      case 'booking': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -257,8 +272,8 @@ const OrderManagement: React.FC = () => {
   const getOrderTypeText = (type: string) => {
     switch (type) {
       case 'delivery': return 'Delivery';
-      case 'dine-in': return 'Dine-in';
-      case 'takeaway': return 'Takeaway';
+      case 'pickup': return 'Pickup';
+      case 'booking': return 'Booking';
       default: return type;
     }
   };
@@ -266,9 +281,9 @@ const OrderManagement: React.FC = () => {
   const getOrderTypeIcon = (type: string) => {
     switch (type) {
       case 'delivery': return <Truck size={16} />;
-      case 'dine-in': return <Utensils size={16} />;
-      case 'takeaway': return <ShoppingBag size={16} />;
-      default: return <Coffee size={16} />;
+      case 'pickup': return <ShoppingBag size={16} />;
+      case 'booking': return <Calendar size={16} />;
+      default: return <Utensils size={16} />;
     }
   };
 
@@ -294,12 +309,12 @@ const OrderManagement: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Invalid date';
-    
+
     const isoDateString = dateString.replace(' ', 'T');
     const date = new Date(isoDateString);
-    
+
     if (isNaN(date.getTime())) return 'Invalid date';
-    
+
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -358,8 +373,8 @@ const OrderManagement: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -384,7 +399,7 @@ const OrderManagement: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Alert Messages */}
         <div className="mb-6">
           <AnimatePresence>
@@ -442,52 +457,24 @@ const OrderManagement: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
         >
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
             <div className="text-2xl font-bold text-gray-900">{orderCounts.all}</div>
             <div className="text-sm text-gray-500">Total Orders</div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
+          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
             <div className="text-2xl font-bold text-blue-600">{orderCounts.delivery}</div>
             <div className="text-sm text-gray-500">Delivery</div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
-            <div className="text-2xl font-bold text-green-600">{orderCounts.dineIn}</div>
-            <div className="text-sm text-gray-500">Dine-in</div>
+          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{orderCounts.pickup}</div>
+            <div className="text-sm text-gray-500">Pickup</div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
-            <div className="text-2xl font-bold text-purple-600">{orderCounts.takeaway}</div>
-            <div className="text-sm text-gray-500">Takeaway</div>
-          </div>
-        </motion.div>
-
-        {/* Status Counters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
-        >
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
-            <div className="text-2xl font-bold text-yellow-600">{orderCounts.pending}</div>
-            <div className="text-sm text-gray-500">Pending</div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
-            <div className="text-2xl font-bold text-blue-600">{orderCounts.preparing}</div>
-            <div className="text-sm text-gray-500">Preparing</div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
-            <div className="text-2xl font-bold text-green-600">{orderCounts.completed}</div>
-            <div className="text-sm text-gray-500">Completed</div>
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
-            <div className="text-2xl font-bold text-red-600">{orderCounts.cancelled}</div>
-            <div className="text-sm text-gray-500">Cancelled</div>
+          <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600">{orderCounts.booking}</div>
+            <div className="text-sm text-gray-500">Booking</div>
           </div>
         </motion.div>
 
@@ -495,7 +482,7 @@ const OrderManagement: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm"
+          className="bg-white rounded-xl border border-gray-200 p-6 mb-8"
         >
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search Input */}
@@ -533,8 +520,8 @@ const OrderManagement: React.FC = () => {
                 >
                   <option value="all">All Types</option>
                   <option value="delivery">Delivery</option>
-                  <option value="dine-in">Dine-in</option>
-                  <option value="takeaway">Takeaway</option>
+                  <option value="pickup">Pickup</option>
+                  <option value="booking">Booking</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <ChevronDown size={16} />
@@ -608,8 +595,8 @@ const OrderManagement: React.FC = () => {
                 >
                   <option value="all">All Types</option>
                   <option value="delivery">Delivery</option>
-                  <option value="dine-in">Dine-in</option>
-                  <option value="takeaway">Takeaway</option>
+                  <option value="pickup">Pickup</option>
+                  <option value="booking">Booking</option>
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <ChevronDown size={16} />
@@ -673,7 +660,7 @@ const OrderManagement: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm"
+          className="bg-white rounded-xl border border-gray-200 overflow-hidden"
         >
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -771,7 +758,7 @@ const OrderManagement: React.FC = () => {
                         >
                           <Phone size={18} />
                         </button>
-                        
+
                         <button
                           onClick={() => handleWhatsApp(order.customer_phone, order.customer_name)}
                           className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
@@ -779,7 +766,7 @@ const OrderManagement: React.FC = () => {
                         >
                           <MessageCircle size={18} />
                         </button>
-                        
+
                         <button
                           onClick={() => fetchOrderDetails(order.id)}
                           className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
@@ -894,6 +881,31 @@ const OrderManagement: React.FC = () => {
                         <div>
                           <h3 className="text-sm font-medium text-gray-500">Table Number</h3>
                           <p className="text-lg font-medium text-gray-900">{selectedOrder.table_number}</p>
+                        </div>
+                      )}
+
+                      {/* Display order type specific information */}
+                      {selectedOrder.order_type === 'delivery' && selectedOrder.delivery_address && (
+                        <div className="md:col-span-2">
+                          <h3 className="text-sm font-medium text-gray-500">Delivery Address</h3>
+                          <p className="text-lg font-medium text-gray-900 flex items-center gap-1">
+                            <MapPin size={16} />
+                            {selectedOrder.delivery_address}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedOrder.order_type === 'pickup' && selectedOrder.pickup_time && (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-500">Pickup Time</h3>
+                          <p className="text-lg font-medium text-gray-900">{selectedOrder.pickup_time}</p>
+                        </div>
+                      )}
+
+                      {selectedOrder.order_type === 'booking' && selectedOrder.booking_time && (
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-500">Booking Time</h3>
+                          <p className="text-lg font-medium text-gray-900">{selectedOrder.booking_time}</p>
                         </div>
                       )}
 
