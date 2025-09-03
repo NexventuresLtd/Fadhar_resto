@@ -332,7 +332,6 @@ const CustomerMenu: React.FC = () => {
             setLoading(false);
         }
     };
-
     const handlePaymentInitiation = async () => {
         if (!createdOrderId || !selectedItem) return;
 
@@ -392,7 +391,17 @@ const CustomerMenu: React.FC = () => {
                                     type="number"
                                     min="1"
                                     value={bookingData.number_of_people}
-                                    onChange={(e) => setBookingData({ ...bookingData, number_of_people: parseInt(e.target.value) || 1 })}
+                                    onChange={(e) => setBookingData({ ...bookingData, number_of_people: parseInt(e.target.value) })}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={orderData.quantity}
+                                    onChange={(e) => setOrderData({ ...orderData, quantity: parseInt(e.target.value) })}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 />
                             </div>
@@ -945,7 +954,7 @@ const CustomerMenu: React.FC = () => {
                                                                     type="number"
                                                                     min="1"
                                                                     value={orderData.quantity}
-                                                                    onChange={(e) => setOrderData({ ...orderData, quantity: parseInt(e.target.value) || 1 })}
+                                                                    onChange={(e) => setOrderData({ ...orderData, quantity: parseInt(e.target.value) })}
                                                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                                                 />
                                                             </div>
