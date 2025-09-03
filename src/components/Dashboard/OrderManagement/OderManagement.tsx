@@ -312,7 +312,7 @@ const OrderManagement: React.FC = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'RWF',
     }).format(amount);
   };
 
@@ -738,7 +738,7 @@ const OrderManagement: React.FC = () => {
                           </span>
                           <span className={`flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
                             {getStatusIcon(order.status)}
-                            {order.status?.charAt(0).toUpperCase() + order.status.slice(1)}
+                            {order.status}
                           </span>
                         </div>
 
@@ -961,7 +961,7 @@ const OrderManagement: React.FC = () => {
                       ) : (
                         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
                           {getStatusIcon(selectedOrder.status)}
-                          {selectedOrder.status?.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                          {selectedOrder.status}
                         </div>
                       )}
                     </div>
