@@ -29,7 +29,7 @@ export const fetchPopularDishes = async (): Promise<Dish[]> => {
       id: item.id,
       title: item.name,
       description: item.description,
-      price: `Rwf ${(item.price / 100).toFixed(2)}`, // Format price as string
+      price: `Rwf ${item.price}`, // Format price as string
       image: item.image == "string"? "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg" : item.image
     }));
   } catch (error) {
@@ -58,18 +58,18 @@ export const fetchPopularDishes = async (): Promise<Dish[]> => {
       title: "Home Delivery",
       desc: "Order online and get fresh meals delivered to your door. Typical delivery window is 45–60 minutes. Choose delivery or pickup during checkout.",
       icon: Truck,
-      bgColor: "from-orange-50 to-orange-100",
-      border: "border-orange-100",
-      iconBg: "from-orange-500 to-orange-500",
+      bgColor: "from-green-50 to-green-100",
+      border: "border-green-100",
+      iconBg: "from-green-700 to-green-700",
     },
     {
       id: 2,
       title: "Instant Table Booking",
       desc: "Pick an available table and confirm instantly. Your booking holds for 30 minutes—if you don’t arrive, it auto-cancels and the table reopens.",
       icon: Utensils,
-      bgColor: "from-orange-50 to-orange-100",
-      border: "border-orange-100",
-      iconBg: "from-orange-500 to-orange-500",
+      bgColor: "from-teal-50 to-teal-100",
+      border: "border-teal-100",
+      iconBg: "from-teal-500 to-teal-500",
     },
     {
       id: 3,

@@ -652,10 +652,10 @@ const MenuItemManagement: React.FC = () => {
                                                     )}
                                                 </div>
                                                 <div className="flex-grow">
-                                                    <h3 className="font-semibold text-green-800 text-lg">{item.name}</h3>
-                                                    <p className="text-green-600 text-sm mb-2">{item.subcategory_name}</p>
-                                                    <p className="text-green-700 text-sm mb-2">{item.description}</p>
-                                                    <p className="font-bold text-green-800">Ksh {item.price.toLocaleString()}</p>
+                                                    <h3 className="font-semibold text-green-800 text-lg uppercase">{item.name}</h3>
+                                                    <p className="text-green-600 text-sm mb-2 lowercase">{item.subcategory_name}</p>
+                                                    <p className="text-green-700 text-sm mb-2 lowercase">{item.description}</p>
+                                                    <p className="font-bold text-green-800">Rwf {item.price.toLocaleString()}</p>
                                                 </div>
                                                 <div className="flex gap-2 self-start">
                                                     <button

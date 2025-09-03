@@ -17,6 +17,7 @@ interface Table {
     id: number;
     number: string;
     capacity: number;
+    table_image?: string;
     status: 'available' | 'booked';
     booking_timeout: string | null;
 }
@@ -441,22 +442,27 @@ const CustomerMenu: React.FC = () => {
                             <>
                                 <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto">
                                     {availableTables.map((table) => (
-                                        <button
+                                        <motion.button
                                             key={table.id}
                                             onClick={() => setBookingData({ ...bookingData, table_id: table.id })}
-                                            className={`p-4 border-2 rounded-lg text-left transition-all ${bookingData.table_id === table.id
+                                            className={`p-0 border-3 cursor-pointer rounded-lg text-left hover:border-orange-500 transition-all ${bookingData.table_id === table.id
                                                 ? 'border-orange-500 bg-orange-50'
                                                 : 'border-gray-200 hover:border-gray-300'
                                                 }`}
                                         >
-                                            <div className="font-medium">Table {table.number}</div>
-                                            <div className="text-sm text-gray-500">Capacity: {table.capacity}</div>
-                                            {bookingData.number_of_people > table.capacity && (
-                                                <div className="text-xs text-red-500 mt-1">
-                                                    Warning: Exceeds table capacity
-                                                </div>
-                                            )}
-                                        </button>
+                                            <div className='w-full'>
+                                                <img src={table.table_image} alt={`Table ${table.number}`} className="w-full h-32 object-cover rounded-t-lg mb-2" />
+                                            </div>
+                                            <div className="px-4 py-2">
+                                                <div className="font-medium">Table {table.number}</div>
+                                                <div className="text-sm text-gray-500">Capacity: {table.capacity}</div>
+                                                {bookingData.number_of_people > table.capacity && (
+                                                    <div className="text-xs text-red-500 mt-1">
+                                                        Warning: Exceeds table capacity
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </motion.button>
                                     ))}
                                 </div>
                                 <button
@@ -611,7 +617,7 @@ const CustomerMenu: React.FC = () => {
                     <motion.h1
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl font-bold text-gray-900 mb-2"
+                        className="text-4xl font-bold text-gray-900 mb-2 font-greatvibes"
                     >
                         Fadhar Restaurant
                     </motion.h1>
@@ -853,38 +859,59 @@ const CustomerMenu: React.FC = () => {
                                             <div className="mb-6">
                                                 <h3 className="text-lg font-medium text-gray-900 mb-3">Order Type</h3>
                                                 <div className="grid grid-cols-3 gap-2">
+                                                    {/* Delivery */}
                                                     <button
                                                         onClick={() => handleOrderTypeChange('delivery')}
-                                                        className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'delivery'
+                                                        className={`group relative p-3 rounded-lg flex cursor-pointer flex-col items-center justify-center transition-colors ${orderType === 'delivery'
                                                             ? 'bg-orange-600 text-white'
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
                                                         <MapPin size={20} />
-                                                        <span className="mt-1 text-sm">Delivery</span>
+                                                        <span className="mt-1 text-sm font-medium">Delivery</span>
+
+                                                        {/* Hover description */}
+                                                        <span className="absolute top-full mt-2 w-40 text-xs text-center text-white bg-gray-800 rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                                                            Get your order delivered straight to your door.
+                                                        </span>
                                                     </button>
+
+                                                    {/* Pickup */}
                                                     <button
                                                         onClick={() => handleOrderTypeChange('pickup')}
-                                                        className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'pickup'
+                                                        className={`group relative p-3 rounded-lg cursor-pointer flex flex-col items-center justify-center transition-colors ${orderType === 'pickup'
                                                             ? 'bg-orange-600 text-white'
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
                                                         <ShoppingCart size={20} />
-                                                        <span className="mt-1 text-sm">Pickup</span>
+                                                        <span className="mt-1 text-sm font-medium">Pickup</span>
+
+                                                        {/* Hover description */}
+                                                        <span className="absolute top-full mt-2 w-40 text-xs text-center text-white bg-gray-800 rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                                                            Place your order online and pick it up yourself.
+                                                        </span>
                                                     </button>
+
+                                                    {/* Booking */}
                                                     <button
                                                         onClick={() => handleOrderTypeChange('booking')}
-                                                        className={`p-3 rounded-lg flex flex-col items-center justify-center transition-colors ${orderType === 'booking'
+                                                        className={`group relative p-3 rounded-lg cursor-pointer flex flex-col items-center justify-center transition-colors ${orderType === 'booking'
                                                             ? 'bg-orange-600 text-white'
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
                                                         <Calendar size={20} />
-                                                        <span className="mt-1 text-sm">Booking</span>
+                                                        <span className="mt-1 text-sm font-medium">Booking</span>
+
+                                                        {/* Hover description */}
+                                                        <span className="absolute top-full mt-2 w-40 text-xs text-center text-white bg-gray-800 rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                                                            Reserve a table in advance for your visit.
+                                                        </span>
                                                     </button>
                                                 </div>
                                             </div>
+
 
                                             {orderType !== 'booking' ? (
                                                 <>

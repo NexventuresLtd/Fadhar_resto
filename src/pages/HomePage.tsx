@@ -4,7 +4,7 @@ import Hero from '../components/HomePage/Hero';
 import Footer from '../components/Shared/Footer';
 // import OurMenu from '../components/HomePage/OurMenu';
 // import BestDel from '../components/HomePage/BestDel';
-// import AboutUS from '../components/HomePage/AboutUS';
+import AboutUS from '../components/HomePage/AboutUS';
 
 
 const Homepage: React.FC = () => {
@@ -15,7 +15,7 @@ const Homepage: React.FC = () => {
       <Hero />
       {/* <OurMenu /> */}
       {/* <BestDel /> */}
-      {/* <AboutUS /> */}
+      <AboutUS />
       <Footer />
     </div>
   );

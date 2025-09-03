@@ -19,7 +19,7 @@ const MenuHero = () => {
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-green-100 to-orange-100 pt-16 pb-20 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-red-100 to-orange-100 pt-16 pb-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="pt-20"></div>
         <motion.div
@@ -30,9 +30,9 @@ const MenuHero = () => {
         >
           <motion.h1
             variants={fadeInUp}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight"
+            className="text-4xl md:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight uppercase"
           >
-            Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-500">Delicious Menu</span>
+            Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-500 uppercase">Delicious Food</span>
           </motion.h1>
 
           <motion.p

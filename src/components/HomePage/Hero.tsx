@@ -38,31 +38,31 @@ export default function Hero() {
     // Show loading state
     if (loading) {
         return (
-            <section className="relative overflow-hidden bg-gradient-to-br from-green-100 to-red-100 pt-16">
+            <section className="relative overflow-hidden bg-gradient-to-br from-orange-100 to-red-100 pt-16">
                 <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         {/* Left Content Skeleton */}
                         <div className="space-y-8">
                             {/* Title Skeleton */}
                             <div className="space-y-4">
-                                <div className="h-12 bg-green-200 rounded-full animate-pulse w-4/5"></div>
-                                <div className="h-12 bg-green-200 rounded-full animate-pulse w-3/4"></div>
-                                <div className="h-12 bg-green-200 rounded-full animate-pulse w-2/3"></div>
+                                <div className="h-12 bg-orange-200 rounded-full animate-pulse w-4/5"></div>
+                                <div className="h-12 bg-orange-200 rounded-full animate-pulse w-3/4"></div>
+                                <div className="h-12 bg-orange-200 rounded-full animate-pulse w-2/3"></div>
                             </div>
 
                             {/* Icon with text Skeleton */}
                             <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-green-200 rounded-full animate-pulse"></div>
+                                <div className="w-12 h-12 bg-orange-200 rounded-full animate-pulse"></div>
                                 <div className="space-y-2">
-                                    <div className="h-4 bg-green-200 rounded-full animate-pulse w-40"></div>
-                                    <div className="h-3 bg-green-200 rounded-full animate-pulse w-32"></div>
+                                    <div className="h-4 bg-orange-200 rounded-full animate-pulse w-40"></div>
+                                    <div className="h-3 bg-orange-200 rounded-full animate-pulse w-32"></div>
                                 </div>
                             </div>
 
                             {/* Buttons Skeleton */}
                             <div className="flex flex-row gap-4 pt-4">
                                 <div className="h-12 bg-orange-500 rounded-full animate-pulse w-32"></div>
-                                <div className="h-12 bg-white border-2 border-green-500 rounded-full animate-pulse w-32"></div>
+                                <div className="h-12 bg-white border-2 border-orange-500 rounded-full animate-pulse w-32"></div>
                             </div>
                         </div>
 
@@ -88,7 +88,7 @@ export default function Hero() {
                                 <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4">
                                     <div className="h-6 bg-orange-200 rounded-full animate-pulse mb-2 w-3/4"></div>
                                     <div className="h-4 bg-orange-200 rounded-full animate-pulse mb-3 w-full"></div>
-                                    <div className="h-4 bg-green-500 rounded-full animate-pulse w-1/4"></div>
+                                    <div className="h-4 bg-orange-500 rounded-full animate-pulse w-1/4"></div>
                                 </div>
                             </div>
                         </div>
@@ -113,22 +113,12 @@ export default function Hero() {
         );
     }
 
-    if (popularDishes.length === 0) {
-        return (
-            <section className="relative overflow-hidden bg-gradient-to-br from-green-100 to-red-100 pt-16">
-                <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                    <div className="text-center">
-                        <p>No dishes available</p>
-                    </div>
-                </div>
-            </section>
-        );
-    }
+
 
     return (
         <>
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-green-100 to-red-100 pt-16">
+            <section className="relative overflow-hidden bg-gradient-to-br from-orange-100 to-red-100 pt-16">
                 <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         {/* Left Content */}
@@ -140,15 +130,15 @@ export default function Hero() {
                         >
                             <motion.h1
                                 variants={fadeInUp}
-                                className="text-3xl lg:text-6xl font-bold text-gray-800 leading-tight"
+                                className="text-3xl  lg:text-5xl font-bold text-gray-800 leading-tight"
                             >
                                 All Fast Food is<br />
-                                Available at <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Fadhar's</span>
+                                Available at <span className="text-7xl text-transparent bg-clip-text bg-gradient-to-r font-greatvibes from-green-700 to-teal-800">Fadhar's</span>
                             </motion.h1>
 
                             <motion.div
                                 variants={fadeInUp}
-                                className="flex items-center space-x-4 text-gray-600"
+                                className="flex items-center  space-x-4 text-gray-600"
                             >
                                 <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center">
                                     <Utensils className="w-6 h-6 text-orange-600" />
@@ -161,7 +151,7 @@ export default function Hero() {
 
                             <motion.div
                                 variants={fadeInUp}
-                                className="flex flex-row gap-4 pt-4"
+                                className="flex flex-row  gap-4 pt-4"
                             >
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
@@ -174,7 +164,7 @@ export default function Hero() {
                                     onClick={() => contactMe()}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="border-2 cursor-pointer border-green-500 text-gray-700 px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold hover:bg-green-50 transition-all"
+                                    className="border-2 cursor-pointer border-black text-gray-700 px-4 text-sm md:text-md md:px-8 py-2 md:py-4 rounded-full font-semibold hover:bg-orange-50 transition-all"
                                 >
                                     Contact Us
                                 </motion.button>
@@ -188,71 +178,84 @@ export default function Hero() {
                             transition={{ duration: 0.8 }}
                             className="relative"
                         >
-                            <div className="relative w-full h-96 flex items-center justify-center">
-                                <AnimatePresence mode="wait">
-                                    <motion.img
-                                        key={currentSlide}
-                                        src={popularDishes[currentSlide].image}
-                                        alt={popularDishes[currentSlide].title}
-                                        className="w-full h-96 object-cover rounded-3xl"
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 1.1 }}
-                                        transition={{ duration: 0.5 }}
-                                    />
-                                </AnimatePresence>
-
-                                {/* Slider Controls */}
-                                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-                                    <motion.button
-                                        onClick={() => setCurrentSlide((currentSlide - 1 + popularDishes.length) % popularDishes.length)}
-                                        className="p-3 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 hover:bg-white transition-all"
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                    >
-                                        <ChevronLeft className="w-6 h-6" />
-                                    </motion.button>
-                                </div>
-
-                                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
-                                    <motion.button
-                                        onClick={() => setCurrentSlide((currentSlide + 1) % popularDishes.length)}
-                                        className="p-3 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 hover:bg-white transition-all"
-                                        whileHover={{ scale: 1.1 }}
-                                        whileTap={{ scale: 0.9 }}
-                                    >
-                                        <ChevronRight className="w-6 h-6" />
-                                    </motion.button>
-                                </div>
-
-                                {/* Dish Info */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.3 }}
-                                    className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4"
-                                >
-                                    <h3 className="text-xl font-semibold text-gray-800 mb-1">
-                                        {popularDishes[currentSlide].title}
-                                    </h3>
-                                    <p className="text-gray-600 text-sm mb-2">
-                                        {popularDishes[currentSlide].description}
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-lg font-bold text-green-600">{popularDishes[currentSlide].price}</span>
+                            {popularDishes.length === 0 &&
+                                <section className="relative overflow-hidden bg-gradient-to-br from-orange-100 to-red-100 pt-16">
+                                    <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                                        <div className="text-center">
+                                            <p>No dishes available</p>
+                                        </div>
                                     </div>
-                                </motion.div>
-                            </div>
+                                </section>}
+                            {popularDishes.length != 0 &&
+                                <div className="relative w-full h-96 flex items-center justify-center">
+                                    <AnimatePresence mode="wait">
+                                        <motion.img
+                                            key={currentSlide}
+                                            src={popularDishes[currentSlide].image}
+                                            alt={popularDishes[currentSlide].title}
+                                            className="w-full h-96 object-cover rounded-3xl"
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 1.1 }}
+                                            transition={{ duration: 0.5 }}
+                                        />
+                                    </AnimatePresence>
+
+                                    {/* Slider Controls */}
+                                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+                                        <motion.button
+                                            onClick={() => setCurrentSlide((currentSlide - 1 + popularDishes.length) % popularDishes.length)}
+                                            className="p-3 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 hover:bg-white transition-all"
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                        >
+                                            <ChevronLeft className="w-6 h-6" />
+                                        </motion.button>
+                                    </div>
+
+                                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
+                                        <motion.button
+                                            onClick={() => setCurrentSlide((currentSlide + 1) % popularDishes.length)}
+                                            className="p-3 rounded-full bg-white/80 backdrop-blur-sm text-gray-800 hover:bg-white transition-all"
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                        >
+                                            <ChevronRight className="w-6 h-6" />
+                                        </motion.button>
+                                    </div>
+
+                                    {/* Dish Info */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                        className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm rounded-2xl p-4"
+                                    >
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-1">
+                                            {popularDishes[currentSlide].title}
+                                        </h3>
+                                        <p className="text-gray-600 text-sm mb-2">
+                                            {popularDishes[currentSlide].description}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-lg font-bold text-orange-600">{popularDishes[currentSlide].price}</span>
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            }
                         </motion.div>
                     </div>
                 </div>
 
                 {/* Features Section */}
-                <div className="bg-white py-12">
+                <motion.div className="bg-white py-12">
                     <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid md:grid-cols-3 gap-8">
                             {features.map(({ id, title, desc, icon: Icon, bgColor, border, iconBg }) => (
                                 <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 * id }}
                                     key={id}
                                     whileHover={{ y: -5 }}
                                     className={`text-center p-6 bg-gradient-to-br ${bgColor} rounded-2xl border ${border}`}
@@ -268,7 +271,7 @@ export default function Hero() {
                             ))}
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </section>
         </>
     )
