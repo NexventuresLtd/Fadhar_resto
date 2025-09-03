@@ -60,6 +60,7 @@ interface OrderDetails {
 const OrderManagement: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
+  console.log(loading)
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<OrderDetails | null>(null);
@@ -196,7 +197,7 @@ const OrderManagement: React.FC = () => {
       delete updatedOrder.menu_item_details;
 
       const response = await mainAxios.put(`/orders/${orderId}`, updatedOrder);
-
+      console.log(response)
       // Update the orders list with the new status
       setOrders(prevOrders =>
         prevOrders.map(order =>
