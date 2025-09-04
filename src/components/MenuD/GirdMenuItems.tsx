@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, MapPin, Calendar, MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign } from 'lucide-react';
+import { ShoppingCart, MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, Table, BookMarked } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 
 interface MenuItem {
@@ -876,8 +876,8 @@ const CustomerMenu: React.FC = () => {
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
-                                                        <MapPin size={20} />
-                                                        <span className="mt-1 text-sm font-medium">Delivery</span>
+                                                        <BikeIcon size={20} />
+                                                        <span className="mt-1 text-sm font-medium">Home Delivery</span>
 
                                                         {/* Hover description */}
                                                         <span className="absolute top-full mt-2 w-40 text-xs text-center text-white bg-gray-800 rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
@@ -893,8 +893,8 @@ const CustomerMenu: React.FC = () => {
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
-                                                        <ShoppingCart size={20} />
-                                                        <span className="mt-1 text-sm font-medium">Pickup</span>
+                                                        <HandGrab size={20} />
+                                                        <span className="mt-1 text-sm font-medium">Pick and Go</span>
 
                                                         {/* Hover description */}
                                                         <span className="absolute top-full mt-2 w-40 text-xs text-center text-white bg-gray-800 rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
@@ -910,8 +910,8 @@ const CustomerMenu: React.FC = () => {
                                                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                             }`}
                                                     >
-                                                        <Calendar size={20} />
-                                                        <span className="mt-1 text-sm font-medium">Booking</span>
+                                                        <BookMarked size={20} />
+                                                        <span className="mt-1 text-sm font-medium">Table Booking</span>
 
                                                         {/* Hover description */}
                                                         <span className="absolute top-full mt-2 w-40 text-xs text-center text-white bg-gray-800 rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
