@@ -35,11 +35,11 @@ const NavBar = () => {
         <>
             {/* Modern Navigation */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white py-1' : 'bg-white backdrop-blur-sm py-1'}`}>
-                <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-11/12 mx-auto sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className=" h-16 w-50 md:w-64 overflow-hidden py-1">
                             {/* <h1 className="text-2xl font-bold text-gray-800 font-delius">Fadhar's</h1> */}
-                            <img src="fadhar.png" className='w-full h-full scale-[5.9] object-contain' alt="" />
+                            <img src="fadhar.png" className='w-full h-full scale-[4.9] md:scale-[5.9] object-contain' alt="" />
                         </div>
 
                         {/* Desktop Navigation */}
@@ -56,7 +56,7 @@ const NavBar = () => {
                                 onClick={() => window.location.href = "/menu"}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className={`px-6 py-2 rounded-full font-medium transition-all backdrop-blur-sm bg-orange-500  text-white`}
+                                className={`px-2 md:px-6 text-nowrap py-2 text-xs md:text-sm rounded-full font-medium transition-all backdrop-blur-sm bg-orange-500  text-white`}
                             >
                                 Order Now
                             </motion.button>
