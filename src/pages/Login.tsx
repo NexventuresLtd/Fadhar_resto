@@ -101,14 +101,14 @@ const FadharAdminLogin: React.FC = () => {
                             initial={{ scale: 0.8 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.2, duration: 0.5 }}
-                            className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-2xl shadow-lg mb-4"
+                            className="inline-flex items-center justify-center w-16 h-16 mb-4"
                         >
                             <div className=" h-16 w-50 md:w-64 overflow-hidden py-1">
                                 {/* <h1 className="text-2xl font-bold text-gray-800 font-delius">Fadhar's</h1> */}
-                                <img src="fadhar.png" className='w-full h-full scale-[4.9] md:scale-[5.9] object-contain' alt="" />
+                                <img src="logo.png" className='w-full h-full object-cover scale-250' alt="" />
                             </div>
                         </motion.div>
-                        <h1 className="text-3xl font-bold text-green-800 mb-2">Fadhar Restaurant</h1>
+                        <h1 className="text-4xl font-bold text-green-800 mb-2 font-greatvibes">Fadhar Restaurant</h1>
                         <p className="text-green-600">Admin Dashboard Login</p>
                     </div>
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">

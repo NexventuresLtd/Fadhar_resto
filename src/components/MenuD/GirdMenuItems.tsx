@@ -798,12 +798,13 @@ const CustomerMenu: React.FC = () => {
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="font-semibold text-lg text-gray-900 mb-2 uppercase">{item.name}</h3>
-                                            <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name}</div>
-                                            <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                                            <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name.toLowerCase()}</div>
+                                            <p className="text-gray-600 text-sm mb-2 lowercase">{item.description.toLowerCase()}</p>
                                             <div className="flex justify-between items-center">
                                                 <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
-                                                <div className="p-2 bg-orange-50 rounded-full">
-                                                    <ShoppingCart size={16} className="text-orange-600" />
+                                                <div className="p-2 bg-orange-100 px-3 rounded-full flex gap-2 items-center">
+                                                    <Utensils size={16} className="text-orange-600" />
+                                                    Order
                                                 </div>
                                             </div>
                                         </div>
@@ -1010,7 +1011,7 @@ const CustomerMenu: React.FC = () => {
                         <div className="text-gray-400 mb-4">
                             <Search size={48} className="mx-auto" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Menu items found</h3>
                         <p className="text-gray-600">Try adjusting your search or filter criteria</p>
                     </div>
                 )}
