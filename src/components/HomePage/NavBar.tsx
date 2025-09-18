@@ -68,7 +68,7 @@ const NavBar = () => {
         <>
             {/* Modern Navigation */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white py-1' : 'bg-white backdrop-blur-sm py-1'}`}>
-                <div className="max-w-11/12 mx-auto sm:px-6 lg:px-8">
+                <div className="max-w-full md:max-w-11/12 mx-auto sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className=" h-16 w-50 md:w-64 overflow-hidden py-1">
                             <img src="fadhar.png" className='w-full h-full scale-[4.9] md:scale-[5.9] object-contain' alt="" />
@@ -78,7 +78,7 @@ const NavBar = () => {
                         <div className="hidden md:flex items-center space-x-8 uppercase font-poppins">
                             <a
                                 href="/"
-                                className={`font-medium transition-colors ${isActive('/')
+                                className={` transition-colors ${isActive('/')
                                     ? 'text-orange-500 font-semibold'
                                     : isScrolled ? 'text-gray-800' : 'text-gray-700'}`}
                             >
