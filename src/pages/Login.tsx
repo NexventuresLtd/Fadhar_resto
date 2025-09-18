@@ -65,7 +65,7 @@ const FadharAdminLogin: React.FC = () => {
         const result = await authService.login(email, password, rememberMe);
 
         if (result?.success) {
-           window.location.href= "/dashboard"
+            window.location.href = "/dashboard"
         } else {
             setError(result?.error || 'Login failed');
         }
@@ -103,7 +103,10 @@ const FadharAdminLogin: React.FC = () => {
                             transition={{ delay: 0.2, duration: 0.5 }}
                             className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-2xl shadow-lg mb-4"
                         >
-                            <UtensilsCrossed className="text-white" size={32} />
+                            <div className=" h-16 w-50 md:w-64 overflow-hidden py-1">
+                                {/* <h1 className="text-2xl font-bold text-gray-800 font-delius">Fadhar's</h1> */}
+                                <img src="fadhar.png" className='w-full h-full scale-[4.9] md:scale-[5.9] object-contain' alt="" />
+                            </div>
                         </motion.div>
                         <h1 className="text-3xl font-bold text-green-800 mb-2">Fadhar Restaurant</h1>
                         <p className="text-green-600">Admin Dashboard Login</p>

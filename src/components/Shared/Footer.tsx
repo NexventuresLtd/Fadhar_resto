@@ -8,7 +8,11 @@ export default function Footer() {
                 <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid md:grid-cols-4 gap-8">
                         <div>
-                            <h3 className="text-2xl font-bold text-white mb-6">Fadhar's</h3>
+                            <div className="h-16 w-50 md:w-72 overflow-hidden py-1">
+                                {/* <h1 className="text-2xl font-bold text-gray-800 font-delius">Fadhar's</h1> */}
+                                <img src="fadhar.png" className='w-full h-full scale-[4.9] md:scale-[5.9] object-contain  filter grayscale' alt="" />
+                            </div>
+
                             <p className="text-gray-400 leading-relaxed">
                                 Creating memorable dining experiences with authentic flavors and fast delivery.
                             </p>

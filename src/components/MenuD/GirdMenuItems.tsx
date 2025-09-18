@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, Table, BookMarked } from 'lucide-react';
+import { MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, Table, BookMarked, Utensils, ShoppingCart } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 
 interface MenuItem {
@@ -759,13 +759,14 @@ const CustomerMenu: React.FC = () => {
                                         />
                                     </div>
                                     <div className="p-4">
-                                        <div className="text-xs text-orange-600 font-medium mb-1">{item.subcategory_name}</div>
-                                        <h3 className="font-semibold text-lg text-gray-900 mb-2">{item.name}</h3>
-                                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
+                                        <h3 className="font-semibold text-lg text-gray-900 mb-2 uppercase">{item.name}</h3>
+                                        <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name}</div>
+                                        <p className="text-gray-600 text-sm mb-3 line-clamp-2 lowercase">{item.description}</p>
                                         <div className="flex justify-between items-center">
                                             <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
-                                            <div className="p-2 bg-orange-50 rounded-full">
-                                                <ShoppingCart size={16} className="text-orange-600" />
+                                            <div className="p-2 bg-orange-100 px-3 rounded-full flex gap-2 items-center">
+                                                <Utensils size={16} className="text-orange-600" />
+                                                Order
                                             </div>
                                         </div>
                                     </div>
@@ -796,8 +797,8 @@ const CustomerMenu: React.FC = () => {
                                             />
                                         </div>
                                         <div className="flex-1">
-                                            <div className="text-xs text-orange-600 font-medium mb-1">{item.subcategory_name}</div>
-                                            <h3 className="font-semibold text-lg text-gray-900 mb-2">{item.name}</h3>
+                                            <h3 className="font-semibold text-lg text-gray-900 mb-2 uppercase">{item.name}</h3>
+                                            <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name}</div>
                                             <p className="text-gray-600 text-sm mb-2">{item.description}</p>
                                             <div className="flex justify-between items-center">
                                                 <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
