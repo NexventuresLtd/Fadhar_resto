@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, Table, BookMarked, Utensils, ShoppingCart } from 'lucide-react';
+import { MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, Table, BookMarked, Utensils } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 
 interface MenuItem {
