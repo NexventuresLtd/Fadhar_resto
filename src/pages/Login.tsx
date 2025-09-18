@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, LogIn, UtensilsCrossed } from 'lucide-react';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
 import mainAxios from '../Instance/mainAxios';
 
 // Auth service functions
