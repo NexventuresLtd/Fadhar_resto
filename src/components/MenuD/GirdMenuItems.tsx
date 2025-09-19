@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, Table, BookMarked, Utensils } from 'lucide-react';
+import { MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 
 interface MenuItem {
@@ -39,11 +39,185 @@ interface BookingData {
     booking_duration: number;
 }
 
-// interface PaymentData {
-//     order_id: number;
-//     amount: number;
-//     phone: string;
-// }
+// Image Skeleton Component
+const ImageSkeleton: React.FC = () => (
+    <div className="w-full h-full bg-gray-200 animate-pulse rounded-lg"></div>
+);
+
+// Menu Item Skeleton Component
+const MenuItemSkeleton: React.FC<{ viewMode: 'grid' | 'list' }> = ({ viewMode }) => {
+    if (viewMode === 'grid') {
+        return (
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <div className="h-48 overflow-hidden">
+                    <ImageSkeleton />
+                </div>
+                <div className="p-4">
+                    <div className="h-6 bg-gray-200 animate-pulse rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 animate-pulse rounded w-1/3 mb-2"></div>
+                    <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3 mb-3"></div>
+                    <div className="flex justify-between items-center">
+                        <div className="h-6 bg-gray-200 animate-pulse rounded w-1/4"></div>
+                        <div className="h-8 bg-gray-200 animate-pulse rounded-full w-1/3"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex gap-4">
+                <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                    <ImageSkeleton />
+                </div>
+                <div className="flex-1">
+                    <div className="h-6 bg-gray-200 animate-pulse rounded mb-2 w-2/3"></div>
+                    <div className="h-4 bg-gray-200 animate-pulse rounded w-1/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 animate-pulse rounded w-full mb-2"></div>
+                    <div className="flex justify-between items-center">
+                        <div className="h-6 bg-gray-200 animate-pulse rounded w-1/4"></div>
+                        <div className="h-8 bg-gray-200 animate-pulse rounded-full w-1/4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Menu Item Card Component
+const MenuItemCard: React.FC<{
+    item: MenuItem;
+    viewMode: 'grid' | 'list';
+    onItemClick: (item: MenuItem) => void;
+    imageLoading: boolean;
+    onImageLoad: (id: number) => void;
+}> = ({ item, viewMode, onItemClick, imageLoading, onImageLoad }) => {
+    const [imgLoaded, setImgLoaded] = useState(false);
+
+    const handleImageLoad = () => {
+        setImgLoaded(true);
+        onImageLoad(item.id);
+    };
+
+    const getImageUrl = (image: string) => {
+        console.log(image)
+        return image === "string" || !image
+            ? "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg"
+            : `${import.meta.env.VITE_API_BASE_URL}${item.image}`;
+    };
+
+    if (viewMode === 'grid') {
+        return (
+            <motion.div
+                whileHover={{ y: -4 }}
+                className="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
+                onClick={() => onItemClick(item)}
+            >
+                <div className="h-48 overflow-hidden relative">
+                    {(!imgLoaded || imageLoading) && <ImageSkeleton />}
+                    <img
+                        src={getImageUrl(item.image)}
+                        alt={item.name}
+                        className={`w-full h-full object-cover ${(!imgLoaded || imageLoading) ? 'hidden' : ''}`}
+                        onLoad={handleImageLoad}
+                        onError={(e) => {
+                            e.currentTarget.src = "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg";
+                        }}
+                    />
+                </div>
+                <div className="p-4">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-2 uppercase">{item.name}</h3>
+                    <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name}</div>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2 lowercase">{item.description}</p>
+                    <div className="flex justify-between items-center">
+                        <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
+                        <div className="p-2 bg-orange-100 px-3 rounded-full flex gap-2 items-center">
+                            <Utensils size={16} className="text-orange-600" />
+                            Order
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    }
+
+    return (
+        <motion.div
+            whileHover={{ x: 4 }}
+            className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-orange-300 transition-colors"
+            onClick={() => onItemClick(item)}
+        >
+            <div className="flex gap-4">
+                <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 relative">
+                    {(!imgLoaded || imageLoading) && <ImageSkeleton />}
+                    <img
+                        src={getImageUrl(item.image)}
+                        alt={item.name}
+                        className={`w-full h-full object-cover ${(!imgLoaded || imageLoading) ? 'hidden' : ''}`}
+                        onLoad={handleImageLoad}
+                        onError={(e) => {
+                            e.currentTarget.src = "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg";
+                        }}
+                    />
+                </div>
+                <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-2 uppercase">{item.name}</h3>
+                    <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name.toLowerCase()}</div>
+                    <p className="text-gray-600 text-sm mb-2 lowercase">{item.description.toLowerCase()}</p>
+                    <div className="flex justify-between items-center">
+                        <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
+                        <div className="p-2 bg-orange-100 px-3 rounded-full flex gap-2 items-center">
+                            <Utensils size={16} className="text-orange-600" />
+                            Order
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+// Menu Items Grid Component
+const MenuItemsGrid: React.FC<{
+    items: MenuItem[];
+    viewMode: 'grid' | 'list';
+    onItemClick: (item: MenuItem) => void;
+    loadingImages: Set<number>;
+    onImageLoad: (id: number) => void;
+}> = ({ items, viewMode, onItemClick, loadingImages, onImageLoad }) => {
+    if (viewMode === 'grid') {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {items.map((item) => (
+                    <MenuItemCard
+                        key={item.id}
+                        item={item}
+                        viewMode={viewMode}
+                        onItemClick={onItemClick}
+                        imageLoading={loadingImages.has(item.id)}
+                        onImageLoad={onImageLoad}
+                    />
+                ))}
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            {items.map((item) => (
+                <MenuItemCard
+                    key={item.id}
+                    item={item}
+                    viewMode={viewMode}
+                    onItemClick={onItemClick}
+                    imageLoading={loadingImages.has(item.id)}
+                    onImageLoad={onImageLoad}
+                />
+            ))}
+        </div>
+    );
+};
 
 const CustomerMenu: React.FC = () => {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -81,14 +255,19 @@ const CustomerMenu: React.FC = () => {
     const [paymentLoading, setPaymentLoading] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [paymentReference, setPaymentReference] = useState<string>('');
-    // const [success, setSuccess] = useState<string>('');
+    const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [initialLoad, setInitialLoad] = useState(true);
+    // const observer = useRef<IntersectionObserver | null>(null);
+    const lastItemRef = useRef<HTMLDivElement | null>(null);
 
     // Fetch categories and menu items on component mount
     useEffect(() => {
         fetchCategories();
         fetchMenuItems();
     }, []);
-    console.log(categories)
+
     // Filter items based on search and category
     useEffect(() => {
         let filtered = menuItems;
@@ -120,18 +299,56 @@ const CustomerMenu: React.FC = () => {
         }
     };
 
-    const fetchMenuItems = async () => {
+    const fetchMenuItems = async (pageNum = 1) => {
         try {
+            if (pageNum === 1) setInitialLoad(true);
             setLoading(true);
-            const response = await mainAxios.get('/menu/');
-            setMenuItems(response.data);
+
+            const response = await mainAxios.get(`/menu/?page=${pageNum}&limit=12`);
+            const newItems = response.data.items || response.data;
+
+            if (pageNum === 1) {
+                setMenuItems(newItems);
+            } else {
+                setMenuItems(prev => [...prev, ...newItems]);
+            }
+
+            setHasMore(newItems.length > 0);
+            setPage(pageNum);
         } catch (err) {
             setError('Failed to fetch menu items');
             console.error('Error fetching menu items:', err);
         } finally {
             setLoading(false);
+            setInitialLoad(false);
         }
     };
+
+    const fetchMoreItems = () => {
+        if (!loading && hasMore) {
+            fetchMenuItems(page + 1);
+        }
+    };
+
+    // Infinite scroll setup with Intersection Observer
+    useEffect(() => {
+        if (loading || !hasMore) return;
+
+        const observer = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                fetchMoreItems();
+            }
+        });
+
+        if (lastItemRef.current) {
+            observer.observe(lastItemRef.current);
+        }
+
+        // Cleanup function to disconnect observer
+        return () => {
+            observer.disconnect();
+        };
+    }, [loading, hasMore,fetchMoreItems]); // Added fetchMoreItems to dependencies
 
     const fetchAvailableTables = async () => {
         try {
@@ -146,61 +363,17 @@ const CustomerMenu: React.FC = () => {
         }
     };
 
-    const initiatePayment = async (orderId: number, amount: number, phone: string) => {
-        try {
-            setPaymentLoading(true);
-            setError(null);
+    // const handleImageLoadStart = useCallback((id: number) => {
+    //     setLoadingImages(prev => new Set(prev).add(id));
+    // }, []);
 
-            const response = await mainAxios.post(`/payments/initiate/${orderId}?amount=${amount}&phone=${phone}`, {});
-
-            setPaymentReference(response.data.reference_id);
-            setPaymentSuccess(true);
-
-            // Start polling for payment status
-            checkPaymentStatusPeriodically(response.data.reference_id);
-
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.detail || 'Failed to initiate payment';
-            setError(errorMessage);
-            console.error('Error initiating payment:', err);
-        } finally {
-            setPaymentLoading(false);
-        }
-    };
-
-    const checkPaymentStatusPeriodically = async (referenceId: string) => {
-        let attempts = 0;
-        const maxAttempts = 20; // Check for 5 minutes (20 * 15 seconds)
-
-        const checkStatus = async () => {
-            if (attempts >= maxAttempts) {
-                console.log('Payment status check timeout');
-                return;
-            }
-
-            try {
-                const response = await mainAxios.get(`/payments/status/${referenceId}`);
-                const status = response.data.status;
-
-                if (status === 'completed') {
-                    setError('Payment completed successfully!');
-                    // You might want to update the UI to show payment completion
-                } else if (status === 'failed') {
-                    setError('Payment failed. Please try again.');
-                } else {
-                    // Continue polling if still pending
-                    attempts++;
-                    setTimeout(checkStatus, 15000); // Check every 15 seconds
-                }
-            } catch (err) {
-                console.error('Error checking payment status:', err);
-                attempts++;
-                setTimeout(checkStatus, 15000);
-            }
-        };
-
-        setTimeout(checkStatus, 15000);
-    };
+    const handleImageLoadComplete = useCallback((id: number) => {
+        setLoadingImages(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(id);
+            return newSet;
+        });
+    }, []);
 
     const handleItemClick = (item: MenuItem) => {
         setSelectedItem(item);
@@ -332,6 +505,63 @@ const CustomerMenu: React.FC = () => {
             setLoading(false);
         }
     };
+
+    const initiatePayment = async (orderId: number, amount: number, phone: string) => {
+        try {
+            setPaymentLoading(true);
+            setError(null);
+
+            const response = await mainAxios.post(`/payments/initiate/${orderId}?amount=${amount}&phone=${phone}`, {});
+
+            setPaymentReference(response.data.reference_id);
+            setPaymentSuccess(true);
+
+            // Start polling for payment status
+            checkPaymentStatusPeriodically(response.data.reference_id);
+
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.detail || 'Failed to initiate payment';
+            setError(errorMessage);
+            console.error('Error initiating payment:', err);
+        } finally {
+            setPaymentLoading(false);
+        }
+    };
+
+    const checkPaymentStatusPeriodically = async (referenceId: string) => {
+        let attempts = 0;
+        const maxAttempts = 20; // Check for 5 minutes (20 * 15 seconds)
+
+        const checkStatus = async () => {
+            if (attempts >= maxAttempts) {
+                console.log('Payment status check timeout');
+                return;
+            }
+
+            try {
+                const response = await mainAxios.get(`/payments/status/${referenceId}`);
+                const status = response.data.status;
+
+                if (status === 'completed') {
+                    setError('Payment completed successfully!');
+                    // You might want to update the UI to show payment completion
+                } else if (status === 'failed') {
+                    setError('Payment failed. Please try again.');
+                } else {
+                    // Continue polling if still pending
+                    attempts++;
+                    setTimeout(checkStatus, 15000); // Check every 15 seconds
+                }
+            } catch (err) {
+                console.error('Error checking payment status:', err);
+                attempts++;
+                setTimeout(checkStatus, 15000);
+            }
+        };
+
+        setTimeout(checkStatus, 15000);
+    };
+
     const handlePaymentInitiation = async () => {
         if (!createdOrderId || !selectedItem) return;
 
@@ -346,12 +576,6 @@ const CustomerMenu: React.FC = () => {
         const phoneNumber = '0790110231';
         window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     };
-
-    const getImageUrl = (image: string) => {
-        return image === "string" || !image ? "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg" : image;
-    };
-
-    const uniqueCategories = [...new Set(menuItems.map(item => item.subcategory_name))];
 
     const renderBookingStep = () => {
         switch (bookingStep) {
@@ -618,6 +842,8 @@ const CustomerMenu: React.FC = () => {
         );
     };
 
+    const uniqueCategories = [...new Set(menuItems.map(item => item.subcategory_name))];
+
     return (
         <div className="min-h-screen bg-white">
             <div className="max-w-11/12 mx-auto px-4 py-8">
@@ -732,88 +958,64 @@ const CustomerMenu: React.FC = () => {
 
                 {/* Menu Items */}
                 <AnimatePresence mode="wait">
-                    {loading ? (
-                        <div className="text-center py-12">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-                        </div>
-                    ) : viewMode === 'grid' ? (
+                    {initialLoad ? (
                         <motion.div
-                            key="grid"
+                            key="skeleton"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            className={viewMode === 'grid'
+                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                : "space-y-4"
+                            }
                         >
-                            {filteredItems.map((item) => (
-                                <motion.div
-                                    key={item.id}
-                                    whileHover={{ y: -4 }}
-                                    className="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:border-orange-300 transition-colors"
-                                    onClick={() => handleItemClick(item)}
-                                >
-                                    <div className="h-48 overflow-hidden">
-                                        <img
-                                            src={getImageUrl(item.image)}
-                                            alt={item.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-lg text-gray-900 mb-2 uppercase">{item.name}</h3>
-                                        <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name}</div>
-                                        <p className="text-gray-600 text-sm mb-3 line-clamp-2 lowercase">{item.description}</p>
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
-                                            <div className="p-2 bg-orange-100 px-3 rounded-full flex gap-2 items-center">
-                                                <Utensils size={16} className="text-orange-600" />
-                                                Order
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
+                            {Array.from({ length: 8 }).map((_, index) => (
+                                <MenuItemSkeleton key={index} viewMode={viewMode} />
                             ))}
                         </motion.div>
                     ) : (
                         <motion.div
-                            key="list"
+                            key="content"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="space-y-4"
                         >
-                            {filteredItems.map((item) => (
-                                <motion.div
-                                    key={item.id}
-                                    whileHover={{ x: 4 }}
-                                    className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-orange-300 transition-colors"
-                                    onClick={() => handleItemClick(item)}
+                            <MenuItemsGrid
+                                items={filteredItems}
+                                viewMode={viewMode}
+                                onItemClick={handleItemClick}
+                                loadingImages={loadingImages}
+                                onImageLoad={handleImageLoadComplete}
+                            />
+
+                            {/* Load more indicator */}
+                            {hasMore && (
+                                <div
+                                    ref={lastItemRef}
+                                    className={viewMode === 'grid'
+                                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6"
+                                        : "space-y-4 mt-4"
+                                    }
                                 >
-                                    <div className="flex gap-4">
-                                        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                                            <img
-                                                src={getImageUrl(item.image)}
-                                                alt={item.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-semibold text-lg text-gray-900 mb-2 uppercase">{item.name}</h3>
-                                            <div className="text-xs text-orange-600 font-medium mb-1 lowercase">{item.subcategory_name.toLowerCase()}</div>
-                                            <p className="text-gray-600 text-sm mb-2 lowercase">{item.description.toLowerCase()}</p>
-                                            <div className="flex justify-between items-center">
-                                                <span className="font-bold text-orange-600">Rwf {item.price.toLocaleString()}</span>
-                                                <div className="p-2 bg-orange-100 px-3 rounded-full flex gap-2 items-center">
-                                                    <Utensils size={16} className="text-orange-600" />
-                                                    Order
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                    {Array.from({ length: 4 }).map((_, index) => (
+                                        <MenuItemSkeleton key={`more-${index}`} viewMode={viewMode} />
+                                    ))}
+                                </div>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                {/* Empty State */}
+                {!initialLoad && !loading && filteredItems.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="text-gray-400 mb-4">
+                            <Search size={48} className="mx-auto" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Dishes Available</h3>
+                        <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+                    </div>
+                )}
 
                 {/* Order Modal */}
                 <AnimatePresence>
@@ -1004,17 +1206,6 @@ const CustomerMenu: React.FC = () => {
                         </div>
                     )}
                 </AnimatePresence>
-
-                {/* Empty State */}
-                {!loading && filteredItems.length === 0 && (
-                    <div className="text-center py-12">
-                        <div className="text-gray-400 mb-4">
-                            <Search size={48} className="mx-auto" />
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Dishes Available</h3>
-                        <p className="text-gray-600">Try adjusting your search or filter criteria</p>
-                    </div>
-                )}
             </div>
         </div>
     );
