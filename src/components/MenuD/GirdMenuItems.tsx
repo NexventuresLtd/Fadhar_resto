@@ -233,6 +233,7 @@ const CustomerMenu: React.FC = () => {
         item_id: 0,
         quantity: 1,
     });
+    console.log(categories)
     const [availableTables, setAvailableTables] = useState<Table[]>([]);
     const [bookingData, setBookingData] = useState<BookingData>({
         table_id: 0,
