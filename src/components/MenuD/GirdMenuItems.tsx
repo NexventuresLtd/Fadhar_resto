@@ -349,7 +349,7 @@ const CustomerMenu: React.FC = () => {
         return () => {
             observer.disconnect();
         };
-    }, [loading, hasMore,fetchMoreItems]); // Added fetchMoreItems to dependencies
+    }, [loading, hasMore, fetchMoreItems]); // Added fetchMoreItems to dependencies
 
     const fetchAvailableTables = async () => {
         try {
@@ -685,7 +685,7 @@ const CustomerMenu: React.FC = () => {
                                                 }`}
                                         >
                                             <div className='w-full'>
-                                                <img src={table.table_image} alt={`Table ${table.number}`} className="w-full h-32 object-cover rounded-t-lg mb-2" />
+                                                <img src={`${import.meta.env.VITE_API_BASE_URL}${table.table_image}`} alt={`Table ${table.number}`} className="w-full h-32 object-cover rounded-t-lg mb-2" />
                                             </div>
                                             <div className="px-4 py-2">
                                                 <div className="font-medium">Table {table.number}</div>

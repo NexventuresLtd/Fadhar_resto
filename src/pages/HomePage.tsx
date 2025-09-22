@@ -16,6 +16,7 @@ const Homepage: React.FC = () => {
       {/* <OurMenu /> */}
       {/* <BestDel /> */}
       <AboutUS />
+      
       <Footer />
     </div>
   );

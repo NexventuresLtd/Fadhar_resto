@@ -313,7 +313,7 @@ const TableManagement: React.FC = () => {
                 {table.table_image && (
                   <div className="relative h-40 bg-gray-100">
                     <img
-                      src={table.table_image}
+                      src={`${import.meta.env.VITE_API_BASE_URL}${table.table_image}`}
                       alt={`Table ${table.number}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {

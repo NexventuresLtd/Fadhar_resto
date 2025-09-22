@@ -1,4 +1,4 @@
-import {  HandGrab, BookMarked, BikeIcon} from "lucide-react";
+import {  HandGrab, BookMarked, BikeIcon, PartyPopperIcon} from "lucide-react";
 
 import mainAxios from "../Instance/mainAxios";
 
@@ -82,5 +82,14 @@ export const features = [
     bgColor: "from-orange-50 to-orange-100",
     border: "border-orange-100",
     iconBg: "from-orange-500 to-red-500",
+  },
+  {
+    id: 4,
+    title: "Events",
+    desc: "Cater your weddings, birthdays, and special events with customized menus and seamless service to make your celebration memorable.",
+    icon: PartyPopperIcon, // replace with the actual icon you want for events
+    bgColor: "from-purple-50 to-purple-100",
+    border: "border-purple-100",
+    iconBg: "from-purple-500 to-purple-500",
   },
 ];

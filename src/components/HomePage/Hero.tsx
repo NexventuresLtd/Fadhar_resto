@@ -192,7 +192,7 @@ export default function Hero() {
                                         <AnimatePresence mode="wait">
                                             <motion.img
                                                 key={currentSlide}
-                                                src={popularDishes[currentSlide].image}
+                                                src={`${import.meta.env.VITE_API_BASE_URL}${popularDishes[currentSlide].image}`}
                                                 alt={popularDishes[currentSlide].title}
                                                 className="w-full h-96 object-cover rounded-3xl"
                                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -280,7 +280,7 @@ export default function Hero() {
                 {/* Features Section */}
                 <motion.div className="bg-white py-12">
                     <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-8">
                             {features.map(({ id, title, desc, icon: Icon, bgColor, border, iconBg }) => (
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}

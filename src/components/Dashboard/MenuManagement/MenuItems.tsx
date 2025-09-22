@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Trash2, Save, X, ChevronDown, ChevronRight, Upload, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, ChevronDown, ChevronRight, Upload, Image as ImageIcon, Search, Filter, Loader } from 'lucide-react';
 import mainAxios from '../../../Instance/mainAxios';
-
 
 interface MenuItem {
     id: number;
@@ -24,6 +23,13 @@ interface Category {
     id: number;
     name: string;
     subcategories: Subcategory[];
+}
+
+interface PaginationInfo {
+    total: number;
+    skip: number;
+    limit: number;
+    hasMore: boolean;
 }
 
 const MenuItemManagement: React.FC = () => {
@@ -54,8 +60,27 @@ const MenuItemManagement: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+    
+    // New state variables for pagination, search and filter
+    const [pagination, setPagination] = useState<PaginationInfo>({
+        total: 0,
+        skip: 0,
+        limit: 10,
+        hasMore: true
+    });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [priceFilter, setPriceFilter] = useState({ min: '', max: '' });
+    const [showFilters, setShowFilters] = useState(false);
+    const [sortBy, setSortBy] = useState('name');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [currentSubcategory, setCurrentSubcategory] = useState<number | null>(null);
+    const [autoLoadEnabled, setAutoLoadEnabled] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    // Fetch categories and menu items on component mount
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastItemRef = useRef<HTMLDivElement | null>(null);
+
+    // Fetch categories on component mount
     useEffect(() => {
         fetchCategories();
         fetchMenuItems();
@@ -76,6 +101,41 @@ const MenuItemManagement: React.FC = () => {
         setSelectedSubcategoryId('');
     }, [selectedCategoryId, categories]);
 
+    // Fetch menu items when filters change
+    useEffect(() => {
+        // Reset to first page when filters change
+        setPagination(prev => ({ ...prev, skip: 0, hasMore: true }));
+        setMenuItems([]);
+        
+        // Use a small timeout to avoid making too many requests while typing
+        const timeoutId = setTimeout(() => {
+            fetchMenuItems();
+        }, 300);
+        
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, priceFilter, sortBy, sortOrder, currentSubcategory]);
+
+    // Set up intersection observer for infinite scroll
+    useEffect(() => {
+        if (loading || !autoLoadEnabled || !pagination.hasMore) return;
+        
+        if (observer.current) observer.current.disconnect();
+        
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && pagination.hasMore && !isLoadingMore) {
+                loadMoreItems();
+            }
+        }, { threshold: 0.5 });
+        
+        if (lastItemRef.current) {
+            observer.current.observe(lastItemRef.current);
+        }
+        
+        return () => {
+            if (observer.current) observer.current.disconnect();
+        };
+    }, [loading, autoLoadEnabled, pagination.hasMore, isLoadingMore]);
+
     const fetchCategories = async () => {
         try {
             setLoading(true);
@@ -92,29 +152,67 @@ const MenuItemManagement: React.FC = () => {
 
     const fetchMenuItems = async () => {
         try {
-            setLoading(true);
-            const response = await mainAxios.get('/menu/');
-            setMenuItems(response.data);
+            if (pagination.skip === 0) {
+                setLoading(true);
+            } else {
+                setIsLoadingMore(true);
+            }
+            
+            // Build query parameters
+            const params = new URLSearchParams();
+            params.append('skip', pagination.skip.toString());
+            params.append('limit', pagination.limit.toString());
+            
+            if (searchQuery) {
+                params.append('search', searchQuery);
+            }
+            
+            if (priceFilter.min) {
+                params.append('min_price', priceFilter.min);
+            }
+            
+            if (priceFilter.max) {
+                params.append('max_price', priceFilter.max);
+            }
+            
+            if (sortBy) {
+                params.append('sort_by', sortBy);
+            }
+            
+            if (sortOrder) {
+                params.append('sort_order', sortOrder);
+            }
+            
+            if (currentSubcategory) {
+                params.append('subcategory_id', currentSubcategory.toString());
+            }
+            
+            const response = await mainAxios.get(`/menu/?${params.toString()}`);
+            const newItems = response.data.items || response.data;
+            
+            if (pagination.skip === 0) {
+                setMenuItems(newItems);
+            } else {
+                setMenuItems(prevItems => [...prevItems, ...newItems]);
+            }
+            
+            // Update pagination info if available in response
+            if (response.data.total !== undefined) {
+                const hasMore = response.data.skip + response.data.limit < response.data.total;
+                setPagination(prev => ({
+                    ...prev,
+                    total: response.data.total,
+                    hasMore
+                }));
+            }
+            
             setError(null);
         } catch (err) {
             setError('Failed to fetch menu items');
             console.error('Error fetching menu items:', err);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const fetchMenuItemsBySubcategory = async (subcategoryId: number) => {
-        try {
-            setLoading(true);
-            const response = await mainAxios.get(`/menu/subcategory/${subcategoryId}`);
-            setMenuItems(response.data);
-            setError(null);
-        } catch (err) {
-            setError('Failed to fetch menu items');
-            console.error('Error fetching menu items:', err);
-        } finally {
-            setLoading(false);
+            setIsLoadingMore(false);
         }
     };
 
@@ -129,7 +227,7 @@ const MenuItemManagement: React.FC = () => {
                     setEditImagePreview(base64);
                 } else {
                     setNewMenuItem({ ...newMenuItem, image: base64 });
-                    setImagePreview(base64);
+                    setImagePreview(null);
                 }
             };
             reader.readAsDataURL(file);
@@ -150,7 +248,9 @@ const MenuItemManagement: React.FC = () => {
                 subcategory_id: parseInt(newMenuItem.subcategory_id)
             });
 
-            setMenuItems([...menuItems, response.data]);
+            // Refresh the menu items after adding
+            fetchMenuItems();
+            
             setNewMenuItem({
                 name: '',
                 description: '',
@@ -161,6 +261,7 @@ const MenuItemManagement: React.FC = () => {
             setImagePreview(null);
             setSelectedCategoryId('');
             setSelectedSubcategoryId('');
+            setAddForm(false);
             setSuccess('Menu item added successfully');
             setTimeout(() => setSuccess(null), 3000);
         } catch (err) {
@@ -185,9 +286,8 @@ const MenuItemManagement: React.FC = () => {
                 subcategory_id: parseInt(editMenuItem.subcategory_id)
             });
 
-            setMenuItems(menuItems.map(item =>
-                item.id === id ? response.data : item
-            ));
+            // Refresh the menu items after updating
+            fetchMenuItems();
 
             setEditingMenuItem(null);
             setEditMenuItem({
@@ -215,7 +315,9 @@ const MenuItemManagement: React.FC = () => {
             setLoading(true);
             await mainAxios.delete(`/menu/${id}`);
 
-            setMenuItems(menuItems.filter(item => item.id !== id));
+            // Refresh the menu items after deleting
+            fetchMenuItems();
+            
             setSuccess('Menu item deleted successfully');
             setTimeout(() => setSuccess(null), 3000);
         } catch (err) {
@@ -270,7 +372,30 @@ const MenuItemManagement: React.FC = () => {
     };
 
     const handleSubcategoryClick = async (subcategoryId: number) => {
-        await fetchMenuItemsBySubcategory(subcategoryId);
+        setCurrentSubcategory(subcategoryId);
+        setPagination(prev => ({ ...prev, skip: 0, hasMore: true })); // Reset to first page
+        setMenuItems([]);
+    };
+
+    const loadMoreItems = useCallback(() => {
+        if (!isLoadingMore && pagination.hasMore) {
+            setPagination(prev => ({ 
+                ...prev, 
+                skip: prev.skip + prev.limit 
+            }));
+            fetchMenuItems();
+        }
+    }, [isLoadingMore, pagination.hasMore]);
+
+    // Reset all filters and show all menu items
+    const showAllMenuItems = () => {
+        setCurrentSubcategory(null);
+        setSearchQuery('');
+        setPriceFilter({ min: '', max: '' });
+        setSortBy('name');
+        setSortOrder('asc');
+        setPagination(prev => ({ ...prev, skip: 0, hasMore: true }));
+        setMenuItems([]);
     };
 
     return (
@@ -316,13 +441,14 @@ const MenuItemManagement: React.FC = () => {
                         </motion.div>
                     )}
                 </AnimatePresence>
-                {showAddForm &&
+                
+                {showAddForm && (
                     <div className="fixed inset-0 bg-black/20 bg-opacity-50 flex items-center justify-center p-4 z-50">
                         {/* Add Menu Item Form */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-lg p-6 mb-8"
+                            className="bg-white rounded-lg p-6 mb-8 max-w-md w-full max-h-screen overflow-y-auto"
                         >
                             <div className="flex justify-between py-2 cursor-pointer">
                                 <h2 className="text-xl font-semibold text-green-700 mb-4">Add New Menu Item</h2>
@@ -424,18 +550,28 @@ const MenuItemManagement: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                onClick={addMenuItem}
-                                disabled={loading || !newMenuItem.name.trim() || !newMenuItem.description.trim() ||
-                                    !newMenuItem.price || !newMenuItem.subcategory_id}
-                                className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors disabled:opacity-50"
-                            >
-                                <Plus size={20} />
-                                Add Menu Item
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={addMenuItem}
+                                    disabled={loading || !newMenuItem.name.trim() || !newMenuItem.description.trim() ||
+                                        !newMenuItem.price || !newMenuItem.subcategory_id}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors disabled:opacity-50"
+                                >
+                                    <Plus size={20} />
+                                    Add Menu Item
+                                </button>
+                                <button
+                                    onClick={() => setAddForm(false)}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-400 transition-colors"
+                                >
+                                    <X size={20} />
+                                    Cancel
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
-                }
+                )}
+                
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Categories Navigation */}
                     <motion.div
@@ -443,9 +579,17 @@ const MenuItemManagement: React.FC = () => {
                         animate={{ opacity: 1, x: 0 }}
                         className="bg-slate-50 rounded-lg overflow-hidden h-fit"
                     >
-                        <h2 className="text-xl font-semibold text-green-700 p-4 border-b border-green-100">
-                            Categories
-                        </h2>
+                        <div className="flex justify-between items-center p-4 border-b border-green-100">
+                            <h2 className="text-xl font-semibold text-green-700">
+                                Categories
+                            </h2>
+                            <button 
+                                onClick={showAllMenuItems}
+                                className="text-sm text-green-600 hover:text-green-800"
+                            >
+                                Show All
+                            </button>
+                        </div>
                         {loading && categories.length === 0 ? (
                             <div className="p-4 text-center text-green-600">Loading categories...</div>
                         ) : categories.length === 0 ? (
@@ -485,7 +629,7 @@ const MenuItemManagement: React.FC = () => {
                                                             <li key={subcategory.id} className="py-1">
                                                                 <button
                                                                     onClick={() => handleSubcategoryClick(subcategory.id)}
-                                                                    className="text-green-600 hover:text-green-800 text-sm"
+                                                                    className={`text-sm ${currentSubcategory === subcategory.id ? 'text-green-800 font-semibold' : 'text-green-600 hover:text-green-800'}`}
                                                                 >
                                                                     {subcategory.name}
                                                                 </button>
@@ -508,174 +652,324 @@ const MenuItemManagement: React.FC = () => {
                         transition={{ delay: 0.2 }}
                         className="bg-slate-50 rounded-lg overflow-hidden lg:col-span-2"
                     >
-                        <div className="flex justify-between items-center px-2">
-
-                            <h2 className="text-xl font-semibold text-green-700 p-4 border-b border-green-100">
-                                Menu Items
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b border-green-100 gap-4">
+                            <h2 className="text-xl font-semibold text-green-700">
+                                {currentSubcategory 
+                                    ? `Menu Items (${categories.find(c => c.subcategories.some(s => s.id === currentSubcategory))?.subcategories.find(s => s.id === currentSubcategory)?.name || ''})`
+                                    : 'All Menu Items'}
                             </h2>
-                            <button onClick={() => setAddForm(true)} className='p-2 cursor-pointer text-white bg-green-500 rounded-sm'>
-                                <Plus />
-                            </button>
+                            <div className="flex gap-2">
+                                <button onClick={() => setAddForm(true)} className='p-2 cursor-pointer text-white bg-green-500 rounded-sm'>
+                                    <Plus />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Search and Filter Section */}
+                        <div className="p-4 border-b border-green-100">
+                            <div className="flex flex-col gap-4">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search menu items..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    />
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={() => setShowFilters(!showFilters)}
+                                        className="flex items-center gap-1 text-green-700 hover:text-green-900"
+                                    >
+                                        <Filter size={18} />
+                                        {showFilters ? 'Hide Filters' : 'Show Filters'}
+                                    </button>
+                                    
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        <label className="flex items-center gap-1 text-sm text-green-700">
+                                            <input
+                                                type="checkbox"
+                                                checked={autoLoadEnabled}
+                                                onChange={() => setAutoLoadEnabled(!autoLoadEnabled)}
+                                                className="rounded text-green-600 focus:ring-green-500"
+                                            />
+                                            Auto Load
+                                        </label>
+                                        
+                                        {(searchQuery || priceFilter.min || priceFilter.max || sortBy !== 'name' || sortOrder !== 'asc') && (
+                                            <button 
+                                                onClick={() => {
+                                                    setSearchQuery('');
+                                                    setPriceFilter({ min: '', max: '' });
+                                                    setSortBy('name');
+                                                    setSortOrder('asc');
+                                                }}
+                                                className="text-sm text-red-600 hover:text-red-800"
+                                            >
+                                                Reset Filters
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                {showFilters && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
+                                    >
+                                        <div>
+                                            <label className="block text-sm font-medium text-green-700 mb-1">Min Price</label>
+                                            <input
+                                                type="number"
+                                                value={priceFilter.min}
+                                                onChange={(e) => setPriceFilter({...priceFilter, min: e.target.value})}
+                                                placeholder="Min price"
+                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-green-700 mb-1">Max Price</label>
+                                            <input
+                                                type="number"
+                                                value={priceFilter.max}
+                                                onChange={(e) => setPriceFilter({...priceFilter, max: e.target.value})}
+                                                placeholder="Max price"
+                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-green-700 mb-1">Sort By</label>
+                                            <select
+                                                value={sortBy}
+                                                onChange={(e) => setSortBy(e.target.value)}
+                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            >
+                                                <option value="name">Name</option>
+                                                <option value="price">Price</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-green-700 mb-1">Order</label>
+                                            <select
+                                                value={sortOrder}
+                                                onChange={(e) => setSortOrder(e.target.value)}
+                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            >
+                                                <option value="asc">Ascending</option>
+                                                <option value="desc">Descending</option>
+                                            </select>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </div>
                         </div>
 
                         {loading && menuItems.length === 0 ? (
-                            <div className="p-6 text-center text-green-600">Loading menu items...</div>
-                        ) : menuItems.length === 0 ? (
-                            <div className="p-6 text-center text-green-600">No menu items found. Select a subcategory or add new items!</div>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-4 p-4">
-                                {menuItems.map((item) => (
-                                    <motion.div
-                                        key={item.id}
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        className="bg-white hover:bg-green-50 cursor-pointer rounded-lg p-4"
-                                    >
-                                        {editingMenuItem === item.id ? (
-                                            <div className="space-y-4">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-green-700 mb-1">Category</label>
-                                                        <select
-                                                            value={selectedCategoryId}
-                                                            onChange={(e) => setSelectedCategoryId(e.target.value ? parseInt(e.target.value) : '')}
-                                                            className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                        >
-                                                            <option value="">Select a category</option>
-                                                            {categories.map((category) => (
-                                                                <option key={category.id} value={category.id}>
-                                                                    {category.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-green-700 mb-1">Subcategory</label>
-                                                        <select
-                                                            value={editMenuItem.subcategory_id}
-                                                            onChange={(e) => setEditMenuItem({ ...editMenuItem, subcategory_id: e.target.value })}
-                                                            className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                        >
-                                                            <option value="">Select a subcategory</option>
-                                                            {filteredSubcategories.map((subcategory) => (
-                                                                <option key={subcategory.id} value={subcategory.id}>
-                                                                    {subcategory.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-green-700 mb-1">Item Name</label>
-                                                        <input
-                                                            type="text"
-                                                            value={editMenuItem.name}
-                                                            onChange={(e) => setEditMenuItem({ ...editMenuItem, name: e.target.value })}
-                                                            className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-green-700 mb-1">Price</label>
-                                                        <input
-                                                            type="number"
-                                                            value={editMenuItem.price}
-                                                            onChange={(e) => setEditMenuItem({ ...editMenuItem, price: e.target.value })}
-                                                            className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-2">
-                                                        <label className="block text-sm font-medium text-green-700 mb-1">Description</label>
-                                                        <textarea
-                                                            value={editMenuItem.description}
-                                                            onChange={(e) => setEditMenuItem({ ...editMenuItem, description: e.target.value })}
-                                                            rows={3}
-                                                            className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-2">
-                                                        <label className="block text-sm font-medium text-green-700 mb-1">Image</label>
-                                                        <div className="flex items-center gap-4">
-                                                            <label className="flex items-center gap-2 bg-green-600 text-white px-3 py-1 rounded-lg cursor-pointer hover:bg-green-700 transition-colors text-sm">
-                                                                <Upload size={16} />
-                                                                Change Image
-                                                                <input
-                                                                    type="file"
-                                                                    accept="image/*"
-                                                                    onChange={(e) => handleImageUpload(e, true)}
-                                                                    className="hidden"
-                                                                />
-                                                            </label>
-                                                            {editImagePreview && (
-                                                                <div className="relative">
-                                                                    <img src={editImagePreview} alt="Preview" className="w-16 h-16 object-cover rounded-lg border border-green-300" />
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setEditMenuItem({ ...editMenuItem, image: '' });
-                                                                            setEditImagePreview(null);
-                                                                        }}
-                                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                                                                    >
-                                                                        <X size={16} />
-                                                                    </button>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2 justify-end">
-                                                    <button
-                                                        onClick={() => updateMenuItem(item.id)}
-                                                        disabled={loading || !editMenuItem.name.trim() || !editMenuItem.description.trim() ||
-                                                            !editMenuItem.price || !editMenuItem.subcategory_id}
-                                                        className="bg-green-600 text-white px-3 py-1 rounded-lg flex items-center gap-1 hover:bg-green-700 transition-colors disabled:opacity-50 text-sm"
-                                                    >
-                                                        <Save size={16} />
-                                                        Save
-                                                    </button>
-                                                    <button
-                                                        onClick={cancelEdit}
-                                                        className="bg-gray-300 text-gray-700 px-3 py-1 rounded-lg flex items-center gap-1 hover:bg-gray-400 transition-colors text-sm"
-                                                    >
-                                                        <X size={16} />
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col md:flex-row gap-4">
-                                                <div className="flex-shrink-0">
-                                                    {item.image ? (
-                                                        <img src={item.image == "string" ? "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg" : item.image} alt={item.name} className="w-24 h-24 object-cover rounded-lg" />
-                                                    ) : (
-                                                        <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center">
-                                                            <ImageIcon size={32} className="text-green-400" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-grow">
-                                                    <h3 className="font-semibold text-green-800 text-lg uppercase">{item.name}</h3>
-                                                    <p className="text-green-600 text-sm mb-2 lowercase">{item.subcategory_name}</p>
-                                                    <p className="text-green-700 text-sm mb-2 lowercase">{item.description}</p>
-                                                    <p className="font-bold text-green-800">Rwf {item.price.toLocaleString()}</p>
-                                                </div>
-                                                <div className="flex gap-2 self-start">
-                                                    <button
-                                                        onClick={() => startEdit(item)}
-                                                        className="text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-100 transition-colors"
-                                                    >
-                                                        <Edit size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteMenuItem(item.id)}
-                                                        className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                ))}
+                            <div className="p-6 text-center text-green-600">
+                                <Loader className="animate-spin mx-auto mb-2" size={24} />
+                                <p>Loading menu items...</p>
                             </div>
+                        ) : menuItems.length === 0 ? (
+                            <div className="p-6 text-center text-green-600">
+                                {searchQuery || priceFilter.min || priceFilter.max 
+                                    ? "No menu items match your filters. Try adjusting your search criteria." 
+                                    : "No menu items found. Add new items!"}
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-1 gap-4 p-4">
+                                    {menuItems.map((item, index) => (
+                                        <motion.div
+                                            key={item.id}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            ref={index === menuItems.length - 1 ? lastItemRef : null}
+                                            className="bg-white hover:bg-green-50 cursor-pointer rounded-lg p-4"
+                                        >
+                                            {editingMenuItem === item.id ? (
+                                                <div className="space-y-4">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-green-700 mb-1">Category</label>
+                                                            <select
+                                                                value={selectedCategoryId}
+                                                                onChange={(e) => setSelectedCategoryId(e.target.value ? parseInt(e.target.value) : '')}
+                                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                            >
+                                                                <option value="">Select a category</option>
+                                                                {categories.map((category) => (
+                                                                    <option key={category.id} value={category.id}>
+                                                                        {category.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-green-700 mb-1">Subcategory</label>
+                                                            <select
+                                                                value={editMenuItem.subcategory_id}
+                                                                onChange={(e) => setEditMenuItem({ ...editMenuItem, subcategory_id: e.target.value })}
+                                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                            >
+                                                                <option value="">Select a subcategory</option>
+                                                                {filteredSubcategories.map((subcategory) => (
+                                                                    <option key={subcategory.id} value={subcategory.id}>
+                                                                        {subcategory.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-green-700 mb-1">Item Name</label>
+                                                            <input
+                                                                type="text"
+                                                                value={editMenuItem.name}
+                                                                onChange={(e) => setEditMenuItem({ ...editMenuItem, name: e.target.value })}
+                                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-green-700 mb-1">Price</label>
+                                                            <input
+                                                                type="number"
+                                                                value={editMenuItem.price}
+                                                                onChange={(e) => setEditMenuItem({ ...editMenuItem, price: e.target.value })}
+                                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <label className="block text-sm font-medium text-green-700 mb-1">Description</label>
+                                                            <textarea
+                                                                value={editMenuItem.description}
+                                                                onChange={(e) => setEditMenuItem({ ...editMenuItem, description: e.target.value })}
+                                                                rows={3}
+                                                                className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <label className="block text-sm font-medium text-green-700 mb-1">Image</label>
+                                                            <div className="flex items-center gap-4">
+                                                                <label className="flex items-center gap-2 bg-green-600 text-white px-3 py-1 rounded-lg cursor-pointer hover:bg-green-700 transition-colors text-sm">
+                                                                    <Upload size={16} />
+                                                                    Change Image
+                                                                    <input
+                                                                        type="file"
+                                                                        accept="image/*"
+                                                                        onChange={(e) => handleImageUpload(e, true)}
+                                                                        className="hidden"
+                                                                    />
+                                                                </label>
+                                                                {editImagePreview && (
+                                                                    <div className="relative">
+                                                                        <img src={editImagePreview} alt="Preview" className="w-16 h-16 object-cover rounded-lg border border-green-300" />
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditMenuItem({ ...editMenuItem, image: '' });
+                                                                                setEditImagePreview(null);
+                                                                            }}
+                                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                                                                        >
+                                                                            <X size={16} />
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2 justify-end">
+                                                        <button
+                                                            onClick={() => updateMenuItem(item.id)}
+                                                            disabled={loading || !editMenuItem.name.trim() || !editMenuItem.description.trim() ||
+                                                                !editMenuItem.price || !editMenuItem.subcategory_id}
+                                                            className="bg-green-600 text-white px-3 py-1 rounded-lg flex items-center gap-1 hover:bg-green-700 transition-colors disabled:opacity-50 text-sm"
+                                                        >
+                                                            <Save size={16} />
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={cancelEdit}
+                                                            className="bg-gray-300 text-gray-700 px-3 py-1 rounded-lg flex items-center gap-1 hover:bg-gray-400 transition-colors text-sm"
+                                                        >
+                                                            <X size={16} />
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col md:flex-row gap-4">
+                                                    <div className="flex-shrink-0">
+                                                        {item.image ? (
+                                                            <img src={item.image == "string" ? "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg" : `${import.meta.env.VITE_API_BASE_URL}${item.image}`} alt={item.name} className="w-24 h-24 object-cover rounded-lg" />
+                                                        ) : (
+                                                            <div className="w-24 h-24 bg-green-100 rounded-lg flex items-center justify-center">
+                                                                <ImageIcon size={32} className="text-green-400" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-grow">
+                                                        <h3 className="font-semibold text-green-800 text-lg uppercase">{item.name}</h3>
+                                                        <p className="text-green-600 text-sm mb-2 lowercase">{item.subcategory_name}</p>
+                                                        <p className="text-green-700 text-sm mb-2 lowercase">{item.description}</p>
+                                                        <p className="font-bold text-green-800">Rwf {item.price.toLocaleString()}</p>
+                                                    </div>
+                                                    <div className="flex gap-2 self-start">
+                                                        <button
+                                                            onClick={() => startEdit(item)}
+                                                            className="text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-100 transition-colors"
+                                                        >
+                                                            <Edit size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteMenuItem(item.id)}
+                                                            className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                
+                                {/* Loading indicator for auto load */}
+                                {isLoadingMore && (
+                                    <div className="p-4 flex justify-center">
+                                        <Loader className="animate-spin text-green-600" size={24} />
+                                    </div>
+                                )}
+                                
+                                {/* Manual load more button for when auto load is disabled */}
+                                {!autoLoadEnabled && pagination.hasMore && (
+                                    <div className="p-4 flex justify-center">
+                                        <button
+                                            onClick={loadMoreItems}
+                                            disabled={isLoadingMore}
+                                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                        >
+                                            {isLoadingMore ? (
+                                                <>
+                                                    <Loader className="animate-spin" size={20} />
+                                                    Loading...
+                                                </>
+                                            ) : (
+                                                'Load More'
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                {/* End of results message */}
+                                {!pagination.hasMore && menuItems.length > 0 && (
+                                    <div className="p-4 text-center text-green-600 border-t border-green-100">
+                                        You've reached the end of the results.
+                                    </div>
+                                )}
+                            </>
                         )}
                     </motion.div>
                 </div>

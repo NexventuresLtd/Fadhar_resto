@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Mail, MapPin, Phone, Clock, Star, Users, Award } from 'lucide-react';
 import { fadeIn, scaleUp, slideUp, staggerContainer } from '../../constants/annimations';
+import EventsCelebrations from './Events';
 
 export default function AboutUS() {
     // Animation variants for reusability
@@ -77,6 +78,7 @@ export default function AboutUS() {
                     </motion.div>
                 </motion.div>
             </motion.section>
+            <EventsCelebrations />
             {/* Hero Section */}
             <motion.section
                 className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-orange-900 hidden"
