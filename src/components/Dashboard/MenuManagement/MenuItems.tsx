@@ -285,7 +285,7 @@ const MenuItemManagement: React.FC = () => {
                 image: editMenuItem.image,
                 subcategory_id: parseInt(editMenuItem.subcategory_id)
             });
-
+            console.log(response)
             // Refresh the menu items after updating
             fetchMenuItems();
 
