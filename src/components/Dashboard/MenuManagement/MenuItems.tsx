@@ -60,7 +60,7 @@ const MenuItemManagement: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
-    
+
     // New state variables for pagination, search and filter
     const [pagination, setPagination] = useState<PaginationInfo>({
         total: 0,
@@ -106,31 +106,31 @@ const MenuItemManagement: React.FC = () => {
         // Reset to first page when filters change
         setPagination(prev => ({ ...prev, skip: 0, hasMore: true }));
         setMenuItems([]);
-        
+
         // Use a small timeout to avoid making too many requests while typing
         const timeoutId = setTimeout(() => {
             fetchMenuItems();
         }, 300);
-        
+
         return () => clearTimeout(timeoutId);
     }, [searchQuery, priceFilter, sortBy, sortOrder, currentSubcategory]);
 
     // Set up intersection observer for infinite scroll
     useEffect(() => {
         if (loading || !autoLoadEnabled || !pagination.hasMore) return;
-        
+
         if (observer.current) observer.current.disconnect();
-        
+
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && pagination.hasMore && !isLoadingMore) {
                 loadMoreItems();
             }
         }, { threshold: 0.5 });
-        
+
         if (lastItemRef.current) {
             observer.current.observe(lastItemRef.current);
         }
-        
+
         return () => {
             if (observer.current) observer.current.disconnect();
         };
@@ -157,45 +157,45 @@ const MenuItemManagement: React.FC = () => {
             } else {
                 setIsLoadingMore(true);
             }
-            
+
             // Build query parameters
             const params = new URLSearchParams();
             params.append('skip', pagination.skip.toString());
             params.append('limit', pagination.limit.toString());
-            
+
             if (searchQuery) {
                 params.append('search', searchQuery);
             }
-            
+
             if (priceFilter.min) {
                 params.append('min_price', priceFilter.min);
             }
-            
+
             if (priceFilter.max) {
                 params.append('max_price', priceFilter.max);
             }
-            
+
             if (sortBy) {
                 params.append('sort_by', sortBy);
             }
-            
+
             if (sortOrder) {
                 params.append('sort_order', sortOrder);
             }
-            
+
             if (currentSubcategory) {
                 params.append('subcategory_id', currentSubcategory.toString());
             }
-            
+
             const response = await mainAxios.get(`/menu/?${params.toString()}`);
             const newItems = response.data.items || response.data;
-            
+
             if (pagination.skip === 0) {
                 setMenuItems(newItems);
             } else {
                 setMenuItems(prevItems => [...prevItems, ...newItems]);
             }
-            
+
             // Update pagination info if available in response
             if (response.data.total !== undefined) {
                 const hasMore = response.data.skip + response.data.limit < response.data.total;
@@ -205,7 +205,7 @@ const MenuItemManagement: React.FC = () => {
                     hasMore
                 }));
             }
-            
+
             setError(null);
         } catch (err) {
             setError('Failed to fetch menu items');
@@ -247,10 +247,10 @@ const MenuItemManagement: React.FC = () => {
                 image: newMenuItem.image,
                 subcategory_id: parseInt(newMenuItem.subcategory_id)
             });
-
+            console.log(response)
             // Refresh the menu items after adding
             fetchMenuItems();
-            
+
             setNewMenuItem({
                 name: '',
                 description: '',
@@ -317,7 +317,7 @@ const MenuItemManagement: React.FC = () => {
 
             // Refresh the menu items after deleting
             fetchMenuItems();
-            
+
             setSuccess('Menu item deleted successfully');
             setTimeout(() => setSuccess(null), 3000);
         } catch (err) {
@@ -379,9 +379,9 @@ const MenuItemManagement: React.FC = () => {
 
     const loadMoreItems = useCallback(() => {
         if (!isLoadingMore && pagination.hasMore) {
-            setPagination(prev => ({ 
-                ...prev, 
-                skip: prev.skip + prev.limit 
+            setPagination(prev => ({
+                ...prev,
+                skip: prev.skip + prev.limit
             }));
             fetchMenuItems();
         }
@@ -441,7 +441,7 @@ const MenuItemManagement: React.FC = () => {
                         </motion.div>
                     )}
                 </AnimatePresence>
-                
+
                 {showAddForm && (
                     <div className="fixed inset-0 bg-black/20 bg-opacity-50 flex items-center justify-center p-4 z-50">
                         {/* Add Menu Item Form */}
@@ -571,7 +571,7 @@ const MenuItemManagement: React.FC = () => {
                         </motion.div>
                     </div>
                 )}
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Categories Navigation */}
                     <motion.div
@@ -583,7 +583,7 @@ const MenuItemManagement: React.FC = () => {
                             <h2 className="text-xl font-semibold text-green-700">
                                 Categories
                             </h2>
-                            <button 
+                            <button
                                 onClick={showAllMenuItems}
                                 className="text-sm text-green-600 hover:text-green-800"
                             >
@@ -654,7 +654,7 @@ const MenuItemManagement: React.FC = () => {
                     >
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b border-green-100 gap-4">
                             <h2 className="text-xl font-semibold text-green-700">
-                                {currentSubcategory 
+                                {currentSubcategory
                                     ? `Menu Items (${categories.find(c => c.subcategories.some(s => s.id === currentSubcategory))?.subcategories.find(s => s.id === currentSubcategory)?.name || ''})`
                                     : 'All Menu Items'}
                             </h2>
@@ -678,16 +678,16 @@ const MenuItemManagement: React.FC = () => {
                                         className="w-full pl-10 pr-4 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                     />
                                 </div>
-                                
+
                                 <div className="flex items-center gap-2">
-                                    <button 
+                                    <button
                                         onClick={() => setShowFilters(!showFilters)}
                                         className="flex items-center gap-1 text-green-700 hover:text-green-900"
                                     >
                                         <Filter size={18} />
                                         {showFilters ? 'Hide Filters' : 'Show Filters'}
                                     </button>
-                                    
+
                                     <div className="flex items-center gap-2 ml-auto">
                                         <label className="flex items-center gap-1 text-sm text-green-700">
                                             <input
@@ -698,9 +698,9 @@ const MenuItemManagement: React.FC = () => {
                                             />
                                             Auto Load
                                         </label>
-                                        
+
                                         {(searchQuery || priceFilter.min || priceFilter.max || sortBy !== 'name' || sortOrder !== 'asc') && (
-                                            <button 
+                                            <button
                                                 onClick={() => {
                                                     setSearchQuery('');
                                                     setPriceFilter({ min: '', max: '' });
@@ -714,9 +714,9 @@ const MenuItemManagement: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
-                                
+
                                 {showFilters && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: 'auto' }}
                                         className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2"
@@ -726,7 +726,7 @@ const MenuItemManagement: React.FC = () => {
                                             <input
                                                 type="number"
                                                 value={priceFilter.min}
-                                                onChange={(e) => setPriceFilter({...priceFilter, min: e.target.value})}
+                                                onChange={(e) => setPriceFilter({ ...priceFilter, min: e.target.value })}
                                                 placeholder="Min price"
                                                 className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                             />
@@ -736,7 +736,7 @@ const MenuItemManagement: React.FC = () => {
                                             <input
                                                 type="number"
                                                 value={priceFilter.max}
-                                                onChange={(e) => setPriceFilter({...priceFilter, max: e.target.value})}
+                                                onChange={(e) => setPriceFilter({ ...priceFilter, max: e.target.value })}
                                                 placeholder="Max price"
                                                 className="w-full px-3 py-1 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                             />
@@ -775,8 +775,8 @@ const MenuItemManagement: React.FC = () => {
                             </div>
                         ) : menuItems.length === 0 ? (
                             <div className="p-6 text-center text-green-600">
-                                {searchQuery || priceFilter.min || priceFilter.max 
-                                    ? "No menu items match your filters. Try adjusting your search criteria." 
+                                {searchQuery || priceFilter.min || priceFilter.max
+                                    ? "No menu items match your filters. Try adjusting your search criteria."
                                     : "No menu items found. Add new items!"}
                             </div>
                         ) : (
@@ -935,14 +935,14 @@ const MenuItemManagement: React.FC = () => {
                                         </motion.div>
                                     ))}
                                 </div>
-                                
+
                                 {/* Loading indicator for auto load */}
                                 {isLoadingMore && (
                                     <div className="p-4 flex justify-center">
                                         <Loader className="animate-spin text-green-600" size={24} />
                                     </div>
                                 )}
-                                
+
                                 {/* Manual load more button for when auto load is disabled */}
                                 {!autoLoadEnabled && pagination.hasMore && (
                                     <div className="p-4 flex justify-center">
@@ -962,7 +962,7 @@ const MenuItemManagement: React.FC = () => {
                                         </button>
                                     </div>
                                 )}
-                                
+
                                 {/* End of results message */}
                                 {!pagination.hasMore && menuItems.length > 0 && (
                                     <div className="p-4 text-center text-green-600 border-t border-green-100">
