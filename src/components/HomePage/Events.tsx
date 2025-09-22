@@ -31,8 +31,8 @@ const defaultEvents: Event[] = [
         ],
         date: "Year Round",
         icon: Heart,
-        phone: "+250788123456",
-        whatsapp: "+250788123456"
+        phone: "+250794285876",
+        whatsapp: "+250794285876"
     },
     {
         id: 2,
@@ -45,8 +45,8 @@ const defaultEvents: Event[] = [
         ],
         date: "Any Season",
         icon: Calendar,
-        phone: "+250788123456",
-        whatsapp: "+250788123456"
+        phone: "+250794285876",
+        whatsapp: "+250794285876"
     },
     {
         id: 3,
@@ -59,8 +59,8 @@ const defaultEvents: Event[] = [
         ],
         date: "All Year",
         icon: Gift,
-        phone: "+250788123456",
-        whatsapp: "+250788123456"
+        phone: "+250794285876",
+        whatsapp: "+250794285876"
     }
 ];
 

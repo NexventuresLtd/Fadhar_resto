@@ -443,9 +443,8 @@ export default function AboutUS() {
                                     transition: { duration: 0.3 }
                                 }}
                             >
-                                <iframe src="https://www.google.com/maps/embed?pb=!4v1757958149744!6m8!1m7!1sUDuhQ2LiD2l6wF2nEMCs8A!2m2!1d-1.964632065124313!2d30.06028303831304!3f218.6754058736404!4f3.921482881689087!5f0.7820865974627469"
+                                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3987.469946284573!2d30.06083818292095!3d-1.965920771819769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca53429d10169%3A0xa6ff535b26e71173!2sFadhar&#39;s%20coffee%20brewers!5e0!3m2!1sen!2srw!4v1758536954034!5m2!1sen!2srw"
                                     className="w-full h-full" loading="lazy" ></iframe>
-
                             </motion.div>
                             {/* Hours */}
                             <motion.div
