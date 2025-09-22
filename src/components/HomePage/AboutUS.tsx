@@ -385,8 +385,8 @@ export default function AboutUS() {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900 text-lg">Address</p>
-                                        <p className="text-gray-600">123 Culinary Street, Food District</p>
-                                        <p className="text-gray-600">Downtown, City 12345</p>
+                                        <p className="text-gray-600">Nyamirambo Mumarangi </p>
+                                        <p className="text-gray-600">Kigali, Rwanda</p>
                                     </div>
                                 </motion.div>
 
@@ -403,7 +403,7 @@ export default function AboutUS() {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900 text-lg">Phone</p>
-                                        <p className="text-gray-600">+250 (790) 110-231</p>
+                                        <p className="text-gray-600">+250 794 285 876</p>
                                         <p className="text-sm text-gray-500">Call us for reservations</p>
                                     </div>
                                 </motion.div>
@@ -421,7 +421,7 @@ export default function AboutUS() {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900 text-lg">Email</p>
-                                        <p className="text-gray-600">hello@fadhars.com</p>
+                                        <p className="text-gray-600">fadharcoffeebrewers@gmail.com</p>
                                         <p className="text-sm text-gray-500">We'd love to hear from you</p>
                                     </div>
                                 </motion.div>
@@ -461,16 +461,8 @@ export default function AboutUS() {
                                 </div>
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center py-2">
-                                        <span className="text-gray-700 font-medium">Monday - Thursday</span>
-                                        <span className="font-bold text-gray-900">11:00 AM - 10:00 PM</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2">
-                                        <span className="text-gray-700 font-medium">Friday - Saturday</span>
-                                        <span className="font-bold text-gray-900">11:00 AM - 11:00 PM</span>
-                                    </div>
-                                    <div className="flex justify-between items-center py-2">
-                                        <span className="text-gray-700 font-medium">Sunday</span>
-                                        <span className="font-bold text-gray-900">12:00 PM - 9:00 PM</span>
+                                        <span className="text-gray-700 font-medium">Monday - Sunday</span>
+                                        <span className="font-bold text-gray-900">10:00 AM - 23:00 PM</span>
                                     </div>
                                 </div>
                             </motion.div>
