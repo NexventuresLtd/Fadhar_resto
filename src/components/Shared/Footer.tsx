@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
     return (
@@ -55,6 +55,17 @@ export default function Footer() {
 
                     <div className="border-t border-gray-700 mt-8 pt-8 text-center">
                         <p className="text-gray-400">© {new Date().getUTCFullYear()} Fadhar's Restaurant. All rights reserved.</p>
+                        <div className="p-3 ml-auto flex gap-2 w-full justify-end items-center">
+                            <a href="https://www.instagram.com/fadhars_coffee_brewers/?__pwa=1" target="_blank" rel="noopener noreferrer">
+                                <Instagram />
+                            </a>
+                            <a href="https://www.facebook.com/profile.php?id=100087358899614" target="_blank" rel="noopener noreferrer">
+                                <Facebook />
+                            </a>
+                            <a href="https://www.tiktok.com/@fadhar.coffee.bre" target="_blank" rel="noopener noreferrer">
+                            <img src="https://store-images.s-microsoft.com/image/apps.47495.13634052595610511.c45457c9-b4af-46b0-8e61-8d7c0aec3f56.a8b71481-8a43-465d-88d6-e63add92c112" className="w-10"/>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </footer>
