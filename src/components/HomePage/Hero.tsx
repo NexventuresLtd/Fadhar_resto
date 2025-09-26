@@ -132,8 +132,8 @@ export default function Hero() {
                                 variants={fadeInUp}
                                 className="text-3xl  lg:text-5xl font-bold text-gray-800 leading-tight"
                             >
-                                All Fast Food is<br />
-                                Available at <span className="text-7xl text-transparent bg-clip-text bg-gradient-to-r font-greatvibes from-green-700 to-teal-800">Fadhar's</span>
+                                Delicious food and refreshing <br />
+                                drinks, served fast at  <br></br><span className="text-7xl text-transparent bg-clip-text bg-gradient-to-r font-greatvibes from-green-700 to-teal-800">Fadhar's</span>
                             </motion.h1>
 
                             <motion.div
