@@ -1,4 +1,4 @@
-export const contactMe = (phone = "250783330008", message = "Hello, Im Reaching out for information on how to order using the platform") => {
+export const contactMe = (phone = "250783330008", message = "Hi, I’m contacting you to learn more about how to place an order through your platform.") => {
     // Encode message for URL
     const encodedMessage = encodeURIComponent(message);
 

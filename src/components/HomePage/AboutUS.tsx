@@ -403,7 +403,7 @@ export default function AboutUS() {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900 text-lg">Phone</p>
-                                        <p className="text-gray-600">+250 794 285 876</p>
+                                        <p className="text-gray-600">+250783330008</p>
                                         <p className="text-sm text-gray-500">Call us for reservations</p>
                                     </div>
                                 </motion.div>
