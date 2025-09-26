@@ -55,7 +55,7 @@ export default function Footer() {
                     </div>
 
                     <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-                        <div className="p-3 ml-auto flex gap-2 w-full justify-end items-center">
+                        <div className="p-3 ml-auto flex gap-2 w-full justify-center md:justify-end items-center">
                             <p className="font-delius">Follow us on :</p>
                             <a href="https://www.instagram.com/fadhars_coffee_brewers/?__pwa=1" target="_blank" rel="noopener noreferrer">
                                 <Instagram />
