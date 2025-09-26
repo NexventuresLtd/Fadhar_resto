@@ -772,7 +772,7 @@ const CustomerMenu: React.FC = () => {
         if (!selectedItem || !createdOrderId) return null;
 
         const totalAmount = selectedItem.price * orderData.quantity;
-        const phone = orderType === 'booking' ? bookingData.customer_phone : orderData.customer_phone;
+        // const phone = orderType === 'booking' ? bookingData.customer_phone : orderData.customer_phone;
 
         return (
             <div className="space-y-6">
