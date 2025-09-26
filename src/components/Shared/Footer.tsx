@@ -31,6 +31,7 @@ export default function Footer() {
                                 <li><a href="#" className="hover:text-orange-400 transition-colors capitalize">pickup service</a></li>
                                 <li><a href="#" className="hover:text-orange-400 transition-colors capitalize">Fast Delivery</a></li>
                                 <li><a href="#" className="hover:text-orange-400 transition-colors capitalize">table booking</a></li>
+                                <li><a href="/#events" className="hover:text-orange-400 transition-colors capitalize">catering services</a></li>
                             </ul>
                         </div>
 
@@ -39,7 +40,7 @@ export default function Footer() {
                             <div className="space-y-3 text-gray-400">
                                 <div className="flex items-center space-x-2">
                                     <Phone className="w-4 h-4" />
-                                    <span>250783330008</span>
+                                    <span>250 783 330 008</span>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Mail className="w-4 h-4" />

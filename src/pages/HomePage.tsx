@@ -15,8 +15,10 @@ const Homepage: React.FC = () => {
       <Hero />
       {/* <OurMenu /> */}
       {/* <BestDel /> */}
-      <AboutUS />
-      
+      <div className='w-full overflow-hidden'>
+        <AboutUS />
+      </div>
+
       <Footer />
     </div>
   );

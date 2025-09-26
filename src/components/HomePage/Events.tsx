@@ -23,7 +23,7 @@ interface EventsCelebrationsProps {
 const defaultEvents: Event[] = [
     {
         id: 1,
-        title: "Dream Wedding",
+        title: "Wedding",
         description: "Make your big day extra delicious with our wedding catering. From cozy dinners to epic feasts, we serve up flavors that everyone will remember.",
         images: [
             "/images/cat1.jpeg",
@@ -37,7 +37,7 @@ const defaultEvents: Event[] = [
     },
     {
         id: 2,
-        title: "Anniversary Celebrations",
+        title: "Celebrations",
         description: "Celebrate your love with food and drinks that speaks the heart. From milestone anniversaries to intimate dinners for two, we cook up the perfect flavors to match your special moments.",
         images: [
             "/images/cat4.jpeg",
@@ -51,7 +51,7 @@ const defaultEvents: Event[] = [
     },
     {
         id: 3,
-        title: "Birthday Parties",
+        title: "Birthday",
         description: "Create magical birthday experiences for all ages. From children's themed parties to sophisticated adult celebrations, every birthday becomes a cherished memory.",
         images: [
             "/images/cat1.jpeg",
@@ -79,7 +79,7 @@ const EventsCelebrations: React.FC<EventsCelebrationsProps> = ({
 
     const handleWhatsApp = (whatsappNumber?: string) => {
         if (whatsappNumber) {
-            contactMe(whatsappNumber,"Hello, I want to enquire about your catering services")
+            contactMe(whatsappNumber, "Hello, I want to enquire about your catering services")
             // window.open(`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '?msg=')}`, '_blank');
         }
     };
@@ -96,14 +96,14 @@ const EventsCelebrations: React.FC<EventsCelebrationsProps> = ({
                 </div>
 
                 {/* Tabs Navigation */}
-                <div className="flex flex-wrap justify-center mb-12 ">
+                <div className="flex justify-center mb-12 ">
                     {events.map((event, index) => {
                         const IconComponent = event.icon;
                         return (
                             <button
                                 key={event.id}
                                 onClick={() => setActiveTab(index)}
-                                className={`flex items-center px-6 py-3 text-lg font-medium rounded-t-lg transition-all duration-300 ${activeTab === index
+                                className={`flex items-center px-2 md:px-6 py-3  text-sm md:text-lg font-medium rounded-t-lg transition-all duration-300 ${activeTab === index
                                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
                                     : 'text-gray-600 hover:text-red-500 hover:bg-red-50'
                                     }`}

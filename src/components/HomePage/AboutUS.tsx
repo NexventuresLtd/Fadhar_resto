@@ -12,7 +12,7 @@ export default function AboutUS() {
 
             {/* CTA Section */}
             <motion.section
-                className="py-20 h-[700px] flex items-center relative overflow-hidden"
+                className="py-20 h-[700px] flex items-center relative"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: false, amount: 0.3 }}
@@ -403,7 +403,7 @@ export default function AboutUS() {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900 text-lg">Phone</p>
-                                        <p className="text-gray-600">+250783330008</p>
+                                        <p className="text-gray-600">+250 783 330 008</p>
                                         <p className="text-sm text-gray-500">Call us for reservations</p>
                                     </div>
                                 </motion.div>
