@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
+import { contactMe } from '../../app/WhatsappMessage';
 
 interface MenuItem {
     id: number;
@@ -572,10 +573,11 @@ const CustomerMenu: React.FC = () => {
         await initiatePayment(createdOrderId, amount, phone);
     };
 
-    const handleWhatsAppInquiry = () => {
-        const message = `Hello, I have an inquiry about my order at Fadhar Restaurant.`;
-        const phoneNumber = '250 783 330 008';
-        window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    const handleWhatsAppInquiry = (name: any, qua: any, price: any) => {
+        const message = `Hello, I’m reaching out regarding my order of ${name} (Quantity: ${qua}, Price: ${price}) at Fadhar Restaurant.`;
+        const phoneNumber = '250783330008';
+        // window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+        contactMe(phoneNumber, message)
     };
 
     const renderBookingStep = () => {
@@ -804,7 +806,7 @@ const CustomerMenu: React.FC = () => {
                             <h4 className="font-medium text-blue-800 mb-2">Payment Instructions</h4>
                             <p className="text-blue-700 text-sm">
                                 Contact number to make your order <strong>0783330008</strong>
-                                 {/* <strong>{phone}</strong> */}
+                                {/* <strong>{phone}</strong> */}
                             </p>
                         </div>
 
@@ -833,7 +835,7 @@ const CustomerMenu: React.FC = () => {
                         Need assistance? Contact us via WhatsApp:
                     </p>
                     <button
-                        onClick={handleWhatsAppInquiry}
+                        onClick={() => handleWhatsAppInquiry(selectedItem.name, orderData.quantity, selectedItem.price)}
                         className="flex items-center justify-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg mx-auto hover:bg-orange-700 transition-colors"
                     >
                         <MessageCircle size={18} />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, Heart, Gift, Phone, MessageCircle } from 'lucide-react';
+import { contactMe } from '../../app/WhatsappMessage';
 
 // TypeScript interfaces
 interface Event {
@@ -78,7 +79,8 @@ const EventsCelebrations: React.FC<EventsCelebrationsProps> = ({
 
     const handleWhatsApp = (whatsappNumber?: string) => {
         if (whatsappNumber) {
-            window.open(`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`, '_blank');
+            contactMe(whatsappNumber,"Hello, I want to enquire about your catering services")
+            // window.open(`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '?msg=')}`, '_blank');
         }
     };
 
