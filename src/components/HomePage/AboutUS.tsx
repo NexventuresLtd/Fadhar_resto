@@ -294,7 +294,7 @@ export default function AboutUS() {
                             </div>
                             <h3 className="text-2xl font-bold text-gray-900 mb-4 font-greatvibes">Fadhar's Owner</h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Fadhar is a visionary leader in the culinary world, dedicated to creating exceptional dining experiences.
+                                Fadhar was established by visionary leaders in the culinary industry, committed to delivering outstanding dining experiences.
                             </p>
                         </motion.div>
 
