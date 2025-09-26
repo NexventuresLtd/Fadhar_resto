@@ -205,7 +205,7 @@ const FadharAdminLogin: React.FC = () => {
                     className="mt-6 p-4 bg-white rounded-lg text-sm text-green-800 text-center"
                 >
                     <p className='text-gray-800'>Use your admin credentials to login</p>
-                    <p onClick={() => window.location.href = "/"} className='underline cursor-pointer'>Vist The Users Side</p>
+                    <p onClick={() => window.location.href = "/"} className='underline cursor-pointer'>Vist The Customer site</p>
                 </motion.div>
             </motion.div>
         </div>
