@@ -574,7 +574,7 @@ const CustomerMenu: React.FC = () => {
 
     const handleWhatsAppInquiry = () => {
         const message = `Hello, I have an inquiry about my order at Fadhar Restaurant.`;
-        const phoneNumber = '0790110231';
+        const phoneNumber = '250 783 330 008';
         window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
@@ -803,7 +803,8 @@ const CustomerMenu: React.FC = () => {
                         <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                             <h4 className="font-medium text-blue-800 mb-2">Payment Instructions</h4>
                             <p className="text-blue-700 text-sm">
-                                You will receive a payment request on your phone number: <strong>{phone}</strong>
+                                Contact number to make your order <strong>0783330008</strong>
+                                 {/* <strong>{phone}</strong> */}
                             </p>
                         </div>
 
