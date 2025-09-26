@@ -23,7 +23,7 @@ const defaultEvents: Event[] = [
     {
         id: 1,
         title: "Dream Wedding",
-        description: "Make your special day unforgettable with our premium wedding planning services. From intimate ceremonies to grand celebrations, we handle every detail with care and precision.",
+        description: "Make your big day extra delicious with our wedding catering. From cozy dinners to epic feasts, we serve up flavors that everyone will remember.",
         images: [
             "/images/cat1.jpeg",
             "/images/cat2.jpeg",
@@ -31,13 +31,13 @@ const defaultEvents: Event[] = [
         ],
         date: "Year Round",
         icon: Heart,
-        phone: "+250794285876",
-        whatsapp: "+250794285876"
+        phone: "+250783330008",
+        whatsapp: "+250783330008"
     },
     {
         id: 2,
         title: "Anniversary Celebrations",
-        description: "Celebrate your love story with elegant anniversary parties. From milestone years to romantic dinners for two, we create the perfect atmosphere for your special moments.",
+        description: "Celebrate your love with food and drinks that speaks the heart. From milestone anniversaries to intimate dinners for two, we cook up the perfect flavors to match your special moments.",
         images: [
             "/images/cat4.jpeg",
             "/images/cat5.jpeg",
@@ -45,8 +45,8 @@ const defaultEvents: Event[] = [
         ],
         date: "Any Season",
         icon: Calendar,
-        phone: "+250794285876",
-        whatsapp: "+250794285876"
+        phone: "+250783330008",
+        whatsapp: "+250783330008"
     },
     {
         id: 3,
@@ -59,8 +59,8 @@ const defaultEvents: Event[] = [
         ],
         date: "All Year",
         icon: Gift,
-        phone: "+250794285876",
-        whatsapp: "+250794285876"
+        phone: "+250783330008",
+        whatsapp: "+250783330008"
     }
 ];
 
