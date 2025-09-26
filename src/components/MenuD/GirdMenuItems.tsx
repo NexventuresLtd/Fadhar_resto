@@ -810,7 +810,7 @@ const CustomerMenu: React.FC = () => {
                         <button
                             onClick={handlePaymentInitiation}
                             disabled={paymentLoading}
-                            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full hidden bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {paymentLoading ? (
                                 <>
