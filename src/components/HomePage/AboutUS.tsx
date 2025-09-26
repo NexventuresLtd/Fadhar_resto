@@ -345,58 +345,48 @@ export default function AboutUS() {
 
             {/* Contact Section */}
             <motion.section
-                className="py-20 bg-white"
+                className="py-16 sm:py-20 bg-white"
                 id="contact"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: false, amount: 0.3 }}
                 variants={fadeIn}
             >
-                <div className="max-w-11/12 mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid lg:grid-cols-2 gap-16">
+                <div className="max-w-full md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
                         {/* Left - Contact Info */}
-                        <motion.div
-                            className="space-y-8"
-                            variants={staggerContainer}
-                        >
+                        <motion.div className="space-y-8" variants={staggerContainer}>
                             <motion.div variants={slideUp}>
-                                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 font-greatvibes">
+                                <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 font-greatvibes">
                                     Visit Us Today
                                 </h2>
-                                <p className="text-xl text-gray-600 mb-8">
+                                <p className="text-lg sm:text-xl text-gray-600 mb-8">
                                     We can't wait to welcome you to the Fadhar's family
                                 </p>
                             </motion.div>
 
-                            <motion.div
-                                className="space-y-6"
-                                variants={staggerContainer}
-                            >
+                            <motion.div className="space-y-6" variants={staggerContainer}>
+                                {/* Address */}
                                 <motion.div
-                                    className="flex items-start space-x-4 p-6 bg-gray-50 rounded-2xl hover:bg-green-50 transition-colors duration-300"
+                                    className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 p-6 bg-gray-50 rounded-2xl hover:bg-green-50 transition-colors duration-300"
                                     variants={slideUp}
-                                    whileHover={{
-                                        x: 10,
-                                        transition: { duration: 0.3 }
-                                    }}
+                                    whileHover={{ x: 10, transition: { duration: 0.3 } }}
                                 >
                                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                                         <MapPin className="w-6 h-6 text-green-600" />
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900 text-lg">Address</p>
-                                        <p className="text-gray-600">Nyamirambo Mumarangi </p>
+                                        <p className="text-gray-600">Nyamirambo Mumarangi</p>
                                         <p className="text-gray-600">Kigali, Rwanda</p>
                                     </div>
                                 </motion.div>
 
+                                {/* Phone */}
                                 <motion.div
-                                    className="flex items-start space-x-4 p-6 bg-gray-50 rounded-2xl hover:bg-green-50 transition-colors duration-300"
+                                    className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 p-6 bg-gray-50 rounded-2xl hover:bg-green-50 transition-colors duration-300"
                                     variants={slideUp}
-                                    whileHover={{
-                                        x: 10,
-                                        transition: { duration: 0.3 }
-                                    }}
+                                    whileHover={{ x: 10, transition: { duration: 0.3 } }}
                                 >
                                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                                         <Phone className="w-6 h-6 text-green-600" />
@@ -408,13 +398,11 @@ export default function AboutUS() {
                                     </div>
                                 </motion.div>
 
+                                {/* Email */}
                                 <motion.div
-                                    className="flex items-start space-x-4 p-6 bg-gray-50 rounded-2xl hover:bg-green-50 transition-colors duration-300"
+                                    className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 p-6 bg-gray-50 rounded-2xl hover:bg-green-50 transition-colors duration-300"
                                     variants={slideUp}
-                                    whileHover={{
-                                        x: 10,
-                                        transition: { duration: 0.3 }
-                                    }}
+                                    whileHover={{ x: 10, transition: { duration: 0.3 } }}
                                 >
                                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                                         <Mail className="w-6 h-6 text-green-600" />
@@ -426,51 +414,45 @@ export default function AboutUS() {
                                     </div>
                                 </motion.div>
                             </motion.div>
-
-
                         </motion.div>
 
-                        {/* Right - Map */}
-                        <motion.div
-                            className="space-y-6"
-                            variants={staggerContainer}
-                        >
+                        {/* Right - Map & Hours */}
+                        <motion.div className="space-y-6" variants={staggerContainer}>
                             <motion.div
-                                className="bg-gradient-to-br from-gray-100 to-green-100 rounded-3xl h-96 flex items-center justify-center relative overflow-hidden"
+                                className="bg-gradient-to-br from-gray-100 to-green-100 rounded-3xl h-64 sm:h-96 flex items-center justify-center overflow-hidden"
                                 variants={scaleUp}
-                                whileHover={{
-                                    scale: 1.02,
-                                    transition: { duration: 0.3 }
-                                }}
+                                whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
                             >
-                                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3987.469946284573!2d30.06083818292095!3d-1.965920771819769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca53429d10169%3A0xa6ff535b26e71173!2sFadhar&#39;s%20coffee%20brewers!5e0!3m2!1sen!2srw!4v1758536954034!5m2!1sen!2srw"
-                                    className="w-full h-full" loading="lazy" ></iframe>
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3987.469946284573!2d30.06083818292095!3d-1.965920771819769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19dca53429d10169%3A0xa6ff535b26e71173!2sFadhar&#39;s%20coffee%20brewers!5e0!3m2!1sen!2srw!4v1758536954034!5m2!1sen!2srw"
+                                    className="w-full h-full rounded-3xl"
+                                    loading="lazy"
+                                ></iframe>
                             </motion.div>
-                            {/* Hours */}
+
                             <motion.div
-                                className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-3xl"
+                                className="bg-gradient-to-br from-green-50 to-green-100 p-6 sm:p-8 rounded-3xl"
                                 variants={slideUp}
-                                whileHover={{
-                                    scale: 1.02,
-                                    transition: { duration: 0.3 }
-                                }}
+                                whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
                             >
-                                <div className="flex items-center mb-6">
+                                <div className="flex items-center mb-4 sm:mb-6">
                                     <Clock className="w-8 h-8 text-green-600 mr-3" />
-                                    <h3 className="text-2xl font-bold text-gray-900 font-greatvibes">Opening Hours</h3>
+                                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 font-greatvibes">
+                                        Opening Hours
+                                    </h3>
                                 </div>
-                                <div className="space-y-3">
+                                <div className="space-y-2 sm:space-y-3">
                                     <div className="flex justify-between items-center py-2">
                                         <span className="text-gray-700 font-medium">Monday - Sunday</span>
-                                        <span className="font-bold text-gray-900">10:00 AM - 23:00 PM</span>
+                                        <span className="font-bold text-gray-900">10:00 AM - 11:00 PM</span>
                                     </div>
                                 </div>
                             </motion.div>
-
                         </motion.div>
                     </div>
                 </div>
             </motion.section>
+
 
         </>
     );
