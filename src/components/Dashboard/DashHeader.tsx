@@ -27,8 +27,8 @@ export default function DashHEader({ sidebarOpen, setSidebarOpen }: PropsHeader)
                         <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">3</span>
                     </button> */}
                     <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-800 font-semibold">{getUserInfo.first_name.slice(0,1)}{""}{getUserInfo.last_name.slice(0,1)}</div>
-                        {sidebarOpen && <span className="text-sm max-lg:hidden">{getUserInfo.first_name}</span>}
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-800 font-semibold">{getUserInfo?.first_name?.slice(0,1)}{""}{getUserInfo?.last_name?.slice(0,1)}</div>
+                        {sidebarOpen && <span className="text-sm max-lg:hidden">{getUserInfo?.first_name}</span>}
                     </div>
                 </div>
             </header>
