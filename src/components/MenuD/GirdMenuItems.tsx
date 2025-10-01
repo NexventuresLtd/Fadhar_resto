@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Grid, List, Search, Filter, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils } from 'lucide-react';
+import { MessageCircle, Grid, List, Search, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils, Plus } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 import { contactMe } from '../../app/WhatsappMessage';
 
@@ -220,9 +220,61 @@ const MenuItemsGrid: React.FC<{
     );
 };
 
+// Category Tabs Component
+const CategoryTabs: React.FC<{
+    categories: string[];
+    selectedCategory: string;
+    onCategorySelect: (category: string) => void;
+}> = ({ categories, selectedCategory, onCategorySelect }) => {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-gray-700">Filter by Category</h3>
+                <button
+                    onClick={() => onCategorySelect('')}
+                    className="text-orange-600 hover:text-orange-800 text-xs font-medium transition-colors"
+                >
+                    Show All
+                </button>
+            </div>
+            <div 
+                ref={scrollContainerRef}
+                className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"
+            >
+                <button
+                    onClick={() => onCategorySelect('')}
+                    className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${
+                        selectedCategory === '' 
+                            ? 'bg-orange-500 text-white border-orange-500 shadow-sm' 
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                    All Items
+                </button>
+                {categories.map((category) => (
+                    <button
+                        key={category}
+                        onClick={() => onCategorySelect(category)}
+                        className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${
+                            selectedCategory === category 
+                                ? 'bg-orange-500 text-white border-orange-500 shadow-sm' 
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                        {category}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 const CustomerMenu: React.FC = () => {
-    const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+    const [allMenuItems, setAllMenuItems] = useState<MenuItem[]>([]);
     const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
+    const [displayedItems, setDisplayedItems] = useState<MenuItem[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
     const [showOrderModal, setShowOrderModal] = useState(false);
@@ -251,7 +303,7 @@ const CustomerMenu: React.FC = () => {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
-    const [showFilters, setShowFilters] = useState(false);
+    // const [showFilters, setShowFilters] = useState(false);
     const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
     const [paymentStep, setPaymentStep] = useState<'order' | 'payment'>('order');
     const [paymentLoading, setPaymentLoading] = useState(false);
@@ -261,32 +313,47 @@ const CustomerMenu: React.FC = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [initialLoad, setInitialLoad] = useState(true);
-    // const observer = useRef<IntersectionObserver | null>(null);
-    const lastItemRef = useRef<HTMLDivElement | null>(null);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+    const itemsPerPage = 12;
 
     // Fetch categories and menu items on component mount
     useEffect(() => {
         fetchCategories();
-        fetchMenuItems();
+        fetchMenuItems(page); // Start with page 1
     }, []);
 
-    // Filter items based on search and category
+    // Apply filters whenever search term, category, or allMenuItems changes
     useEffect(() => {
-        let filtered = menuItems;
+        applyFilters();
+    }, [allMenuItems, searchTerm, selectedCategory]);
 
+    // Reset displayed items when filters change
+    useEffect(() => {
+        setDisplayedItems(filteredItems.slice(0, itemsPerPage));
+        setPage(1);
+        setHasMore(filteredItems.length > itemsPerPage);
+    }, [filteredItems]);
+
+    const applyFilters = () => {
+        let filtered = [...allMenuItems];
+
+        // Apply search filter
         if (searchTerm) {
+            const query = searchTerm.toLowerCase();
             filtered = filtered.filter(item =>
-                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.description.toLowerCase().includes(searchTerm.toLowerCase())
+                item.name.toLowerCase().includes(query) ||
+                item.description.toLowerCase().includes(query)
             );
         }
 
+        // Apply category filter
         if (selectedCategory) {
             filtered = filtered.filter(item => item.subcategory_name === selectedCategory);
         }
 
         setFilteredItems(filtered);
-    }, [menuItems, searchTerm, selectedCategory]);
+    };
 
     const fetchCategories = async () => {
         try {
@@ -301,56 +368,59 @@ const CustomerMenu: React.FC = () => {
         }
     };
 
-    const fetchMenuItems = async (pageNum = 1) => {
-        try {
-            if (pageNum === 1) setInitialLoad(true);
-            setLoading(true);
+const fetchMenuItems = async (pageNum: number) => {
+    try {
+        if (pageNum === 1) {
+            setInitialLoad(true);
+        } else {
+            setIsLoadingMore(true);
+        }
 
-            const response = await mainAxios.get(`/menu/?page=${pageNum}&limit=12`);
-            const newItems = response.data.items || response.data;
+        const response = await mainAxios.get(`/menu/?page=${pageNum}&limit=${itemsPerPage}`);
+        const newItems = response.data.items || response.data;
 
-            if (pageNum === 1) {
-                setMenuItems(newItems);
-            } else {
-                setMenuItems(prev => [...prev, ...newItems]);
+        if (pageNum === 1) {
+            setAllMenuItems(newItems);
+            setFilteredItems(newItems);
+            setDisplayedItems(newItems.slice(0, itemsPerPage));
+        } else {
+            // For load more, append to existing items
+            const updatedAllItems = [...allMenuItems, ...newItems];
+            setAllMenuItems(updatedAllItems);
+            
+            // Re-apply filters to the updated list
+            let filtered = updatedAllItems;
+            if (searchTerm) {
+                const query = searchTerm.toLowerCase();
+                filtered = filtered.filter(item =>
+                    item.name.toLowerCase().includes(query) ||
+                    item.description.toLowerCase().includes(query)
+                );
             }
-
-            setHasMore(newItems.length > 0);
-            setPage(pageNum);
-        } catch (err) {
-            setError('Failed to fetch menu items');
-            console.error('Error fetching menu items:', err);
-        } finally {
-            setLoading(false);
-            setInitialLoad(false);
-        }
-    };
-
-    const fetchMoreItems = () => {
-        if (!loading && hasMore) {
-            fetchMenuItems(page + 1);
-        }
-    };
-
-    // Infinite scroll setup with Intersection Observer
-    useEffect(() => {
-        if (loading || !hasMore) return;
-
-        const observer = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) {
-                fetchMoreItems();
+            if (selectedCategory) {
+                filtered = filtered.filter(item => item.subcategory_name === selectedCategory);
             }
-        });
-
-        if (lastItemRef.current) {
-            observer.observe(lastItemRef.current);
+            
+            setFilteredItems(filtered);
+            setDisplayedItems(filtered.slice(0, (pageNum) * itemsPerPage));
         }
 
-        // Cleanup function to disconnect observer
-        return () => {
-            observer.disconnect();
-        };
-    }, [loading, hasMore, fetchMoreItems]); // Added fetchMoreItems to dependencies
+        setHasMore(newItems.length === itemsPerPage);
+        setPage(pageNum);
+    } catch (err) {
+        setError('Failed to fetch menu items');
+        console.error('Error fetching menu items:', err);
+    } finally {
+        setInitialLoad(false);
+        setIsLoadingMore(false);
+    }
+};
+
+    const handleLoadMoreClick = () => {
+        if (!isLoadingMore && hasMore) {
+        }
+        fetchMenuItems(page + 1);
+    };
 
     const fetchAvailableTables = async () => {
         try {
@@ -364,10 +434,6 @@ const CustomerMenu: React.FC = () => {
             setLoading(false);
         }
     };
-
-    // const handleImageLoadStart = useCallback((id: number) => {
-    //     setLoadingImages(prev => new Set(prev).add(id));
-    // }, []);
 
     const handleImageLoadComplete = useCallback((id: number) => {
         setLoadingImages(prev => {
@@ -574,9 +640,8 @@ const CustomerMenu: React.FC = () => {
     };
 
     const handleWhatsAppInquiry = (name: any, qua: any, price: any) => {
-        const message = `Hello, I’m reaching out regarding my order of ${name} (Quantity: ${qua}, Price: ${price}) at Fadhar Restaurant.`;
+        const message = `Hello, I'm reaching out regarding my order of ${name} (Quantity: ${qua}, Price: ${price}) at Fadhar Restaurant.`;
         const phoneNumber = '250783330008';
-        // window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
         contactMe(phoneNumber, message)
     };
 
@@ -774,7 +839,6 @@ const CustomerMenu: React.FC = () => {
         if (!selectedItem || !createdOrderId) return null;
 
         const totalAmount = selectedItem.price * orderData.quantity;
-        // const phone = orderType === 'booking' ? bookingData.customer_phone : orderData.customer_phone;
 
         return (
             <div className="space-y-6">
@@ -806,7 +870,6 @@ const CustomerMenu: React.FC = () => {
                             <h4 className="font-medium text-blue-800 mb-2">Payment Instructions</h4>
                             <p className="text-blue-700 text-sm">
                                 Contact number to make your order <strong>0783330008</strong>
-                                {/* <strong>{phone}</strong> */}
                             </p>
                         </div>
 
@@ -846,7 +909,7 @@ const CustomerMenu: React.FC = () => {
         );
     };
 
-    const uniqueCategories = [...new Set(menuItems.map(item => item.subcategory_name))];
+    const uniqueCategories = [...new Set(allMenuItems.map(item => item.subcategory_name))];
 
     return (
         <div className="min-h-screen bg-white">
@@ -881,7 +944,7 @@ const CustomerMenu: React.FC = () => {
                 </AnimatePresence>
 
                 {/* Controls */}
-                <div className="flex flex-col md:flex-row gap-4 mb-8">
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
                     {/* Search */}
                     <div className="flex-1 relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -892,55 +955,6 @@ const CustomerMenu: React.FC = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         />
-                    </div>
-
-                    {/* Filter */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                            <Filter size={18} />
-                            Filter
-                        </button>
-                        <AnimatePresence>
-                            {showFilters && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
-                                    className="absolute top-full mt-2 right-0 bg-white border border-gray-200 rounded-lg p-4 z-10 min-w-48"
-                                >
-                                    <h4 className="font-medium text-gray-900 mb-3">Category</h4>
-                                    <div className="space-y-2">
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="category"
-                                                value=""
-                                                checked={selectedCategory === ''}
-                                                onChange={(e) => setSelectedCategory(e.target.value)}
-                                                className="mr-2"
-                                            />
-                                            All Categories
-                                        </label>
-                                        {uniqueCategories.map(category => (
-                                            <label key={category} className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name="category"
-                                                    value={category}
-                                                    checked={selectedCategory === category}
-                                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                                    className="mr-2"
-                                                />
-                                                {category}
-                                            </label>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
                     </div>
 
                     {/* View Mode Toggle */}
@@ -959,6 +973,13 @@ const CustomerMenu: React.FC = () => {
                         </button>
                     </div>
                 </div>
+
+                {/* Category Tabs - Horizontal under search */}
+                <CategoryTabs
+                    categories={uniqueCategories}
+                    selectedCategory={selectedCategory}
+                    onCategorySelect={setSelectedCategory}
+                />
 
                 {/* Menu Items */}
                 <AnimatePresence mode="wait">
@@ -985,25 +1006,40 @@ const CustomerMenu: React.FC = () => {
                             exit={{ opacity: 0 }}
                         >
                             <MenuItemsGrid
-                                items={filteredItems}
+                                items={displayedItems}
                                 viewMode={viewMode}
                                 onItemClick={handleItemClick}
                                 loadingImages={loadingImages}
                                 onImageLoad={handleImageLoadComplete}
                             />
 
-                            {/* Load more indicator */}
-                            {hasMore && (
-                                <div
-                                    ref={lastItemRef}
-                                    className={viewMode === 'grid'
-                                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6"
-                                        : "space-y-4 mt-4"
-                                    }
-                                >
-                                    {Array.from({ length: 4 }).map((_, index) => (
-                                        <MenuItemSkeleton key={`more-${index}`} viewMode={viewMode} />
-                                    ))}
+                            {/* Load More Button */}
+                            {/* {!hasMore && (
+                            )} */}
+                                <div className="flex justify-center mt-8">
+                                    <button
+                                        onClick={handleLoadMoreClick}
+                                        disabled={isLoadingMore}
+                                        className="bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        {isLoadingMore ? (
+                                            <>
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                Loading...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Plus size={20} />
+                                                Load More
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                            {/* End of results */}
+                            {!hasMore && displayedItems.length > 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <p>All {displayedItems.length} items displayed</p>
                                 </div>
                             )}
                         </motion.div>
@@ -1011,7 +1047,7 @@ const CustomerMenu: React.FC = () => {
                 </AnimatePresence>
 
                 {/* Empty State */}
-                {!initialLoad && !loading && filteredItems.length === 0 && (
+                {!initialLoad && !loading && displayedItems.length === 0 && (
                     <div className="text-center py-12">
                         <div className="text-gray-400 mb-4">
                             <Search size={48} className="mx-auto" />
