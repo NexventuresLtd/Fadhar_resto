@@ -1102,7 +1102,7 @@ const CustomerMenu: React.FC = () => {
                                         ) : (
                                             <>
                                                 <Plus size={20} />
-                                                Load More ({Math.min(itemsPerDisplayPage, filteredItems.length - displayedItems.length)} items)
+                                                Load More
                                             </>
                                         )}
                                     </motion.button>
