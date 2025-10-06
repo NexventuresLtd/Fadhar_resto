@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Grid, List, Search, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils, Plus } from 'lucide-react';
+import { MessageCircle, Grid, List, Search, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils, Plus, Loader } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 import { contactMe } from '../../app/WhatsappMessage';
 
@@ -12,6 +12,7 @@ interface MenuItem {
     image: string;
     subcategory_id: number;
     subcategory_name: string;
+    category_name: string;
 }
 
 interface Table {
@@ -38,6 +39,18 @@ interface BookingData {
     customer_phone: string;
     number_of_people: number;
     booking_duration: number;
+}
+
+interface Category {
+    id: number;
+    name: string;
+    subcategories: Subcategory[];
+}
+
+interface Subcategory {
+    id: number;
+    name: string;
+    category_id: number;
 }
 
 // Image Skeleton Component
@@ -102,7 +115,6 @@ const MenuItemCard: React.FC<{
     };
 
     const getImageUrl = (image: string) => {
-        console.log(image)
         return image === "string" || !image
             ? "https://m.media-amazon.com/images/I/81Ty4ssA1oL.jpg"
             : `${import.meta.env.VITE_API_BASE_URL}${item.image}`;
@@ -222,9 +234,9 @@ const MenuItemsGrid: React.FC<{
 
 // Category Tabs Component
 const CategoryTabs: React.FC<{
-    categories: string[];
-    selectedCategory: string;
-    onCategorySelect: (category: string) => void;
+    categories: Category[];
+    selectedCategory: number | null;
+    onCategorySelect: (categoryId: number | null) => void;
 }> = ({ categories, selectedCategory, onCategorySelect }) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -233,7 +245,7 @@ const CategoryTabs: React.FC<{
             <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-gray-700">Filter by Category</h3>
                 <button
-                    onClick={() => onCategorySelect('')}
+                    onClick={() => onCategorySelect(null)}
                     className="text-orange-600 hover:text-orange-800 text-xs font-medium transition-colors"
                 >
                     Show All
@@ -244,9 +256,9 @@ const CategoryTabs: React.FC<{
                 className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"
             >
                 <button
-                    onClick={() => onCategorySelect('')}
+                    onClick={() => onCategorySelect(null)}
                     className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${
-                        selectedCategory === '' 
+                        selectedCategory === null 
                             ? 'bg-orange-500 text-white border-orange-500 shadow-sm' 
                             : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                     }`}
@@ -255,15 +267,15 @@ const CategoryTabs: React.FC<{
                 </button>
                 {categories.map((category) => (
                     <button
-                        key={category}
-                        onClick={() => onCategorySelect(category)}
+                        key={category.id}
+                        onClick={() => onCategorySelect(category.id)}
                         className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${
-                            selectedCategory === category 
+                            selectedCategory === category.id 
                                 ? 'bg-orange-500 text-white border-orange-500 shadow-sm' 
                                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                         }`}
                     >
-                        {category}
+                        {category.name}
                     </button>
                 ))}
             </div>
@@ -275,7 +287,7 @@ const CustomerMenu: React.FC = () => {
     const [allMenuItems, setAllMenuItems] = useState<MenuItem[]>([]);
     const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
     const [displayedItems, setDisplayedItems] = useState<MenuItem[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [orderType, setOrderType] = useState<'delivery' | 'pickup' | 'booking'>('delivery');
@@ -286,7 +298,6 @@ const CustomerMenu: React.FC = () => {
         item_id: 0,
         quantity: 1,
     });
-    console.log(categories)
     const [availableTables, setAvailableTables] = useState<Table[]>([]);
     const [bookingData, setBookingData] = useState<BookingData>({
         table_id: 0,
@@ -302,124 +313,177 @@ const CustomerMenu: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
-    // const [showFilters, setShowFilters] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
     const [paymentStep, setPaymentStep] = useState<'order' | 'payment'>('order');
     const [paymentLoading, setPaymentLoading] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [paymentReference, setPaymentReference] = useState<string>('');
     const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
+    const [currentDisplayPage, setCurrentDisplayPage] = useState(1);
+    const [currentFetchPage, setCurrentFetchPage] = useState(1);
+    const [hasMoreDisplay, setHasMoreDisplay] = useState(true);
+    const [hasMoreData, setHasMoreData] = useState(true);
     const [initialLoad, setInitialLoad] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [backgroundLoading, setBackgroundLoading] = useState(false);
+    const [allDataLoaded, setAllDataLoaded] = useState(false);
+    console.log(hasMoreData)
+    const itemsPerDisplayPage = 20;
+    const itemsPerFetch = 100;
 
-    const itemsPerPage = 12;
-
-    // Fetch categories and menu items on component mount
+    // Fetch initial data on component mount
     useEffect(() => {
-        fetchCategories();
-        fetchMenuItems(page); // Start with page 1
+        fetchInitialData();
     }, []);
 
-    // Apply filters whenever search term, category, or allMenuItems changes
+    // Apply filters to ALL data whenever search term, category, or allMenuItems changes
     useEffect(() => {
         applyFilters();
     }, [allMenuItems, searchTerm, selectedCategory]);
 
-    // Reset displayed items when filters change
+    // Reset display when filters change
     useEffect(() => {
-        setDisplayedItems(filteredItems.slice(0, itemsPerPage));
-        setPage(1);
-        setHasMore(filteredItems.length > itemsPerPage);
+        setCurrentDisplayPage(1);
+        updateDisplayedItems(1);
     }, [filteredItems]);
+
+    // Background fetching - continuously fetch until all data is loaded
+    useEffect(() => {
+        if (!allDataLoaded && !backgroundLoading && !initialLoad) {
+            fetchMoreDataInBackground();
+        }
+    }, [allDataLoaded, backgroundLoading, initialLoad, currentFetchPage]);
+
+    const fetchInitialData = async () => {
+        try {
+            setInitialLoad(true);
+            
+            // Fetch categories first
+            const categoriesResponse = await mainAxios.get('/categories/');
+            setCategories(categoriesResponse.data);
+
+            // Fetch first batch of menu items
+            await fetchMenuItems(1);
+            
+            setError(null);
+        } catch (err) {
+            setError('Failed to fetch data');
+            console.error('Error fetching data:', err);
+        } finally {
+            setInitialLoad(false);
+        }
+    };
+
+    const fetchMenuItems = async (page: number): Promise<boolean> => {
+        try {
+            const response = await mainAxios.get('/menu/', {
+                params: {
+                    skip: itemsPerFetch * (page - 1),
+                    limit: itemsPerFetch
+                }
+            });
+            
+            const items = response.data.items || response.data;
+            
+            if (items && items.length > 0) {
+                setAllMenuItems(prev => {
+                    const combined = [...prev, ...items];
+                    // Remove duplicates based on id
+                    const uniqueItems = combined.filter((item, index, self) =>
+                        index === self.findIndex(i => i.id === item.id)
+                    );
+                    return uniqueItems;
+                });
+                
+                // Check if there's more data to fetch
+                const hasMore = items.length === itemsPerFetch;
+                setHasMoreData(hasMore);
+                if (!hasMore) {
+                    setAllDataLoaded(true);
+                }
+                
+                return hasMore;
+            } else {
+                setHasMoreData(false);
+                setAllDataLoaded(true);
+                return false;
+            }
+        } catch (err) {
+            setError('Failed to fetch menu items');
+            console.error('Error fetching menu items:', err);
+            return false;
+        }
+    };
+
+    const fetchMoreDataInBackground = async () => {
+        if (allDataLoaded || backgroundLoading) return;
+
+        setBackgroundLoading(true);
+        try {
+            const nextPage = currentFetchPage + 1;
+            const hasMore = await fetchMenuItems(nextPage);
+            if (hasMore) {
+                setCurrentFetchPage(nextPage);
+            }
+        } catch (err) {
+            console.error('Error in background fetching:', err);
+        } finally {
+            setBackgroundLoading(false);
+        }
+    };
 
     const applyFilters = () => {
         let filtered = [...allMenuItems];
 
-        // Apply search filter
+        // Apply search filter to ALL data
         if (searchTerm) {
             const query = searchTerm.toLowerCase();
             filtered = filtered.filter(item =>
                 item.name.toLowerCase().includes(query) ||
-                item.description.toLowerCase().includes(query)
+                item.description.toLowerCase().includes(query) ||
+                item.subcategory_name.toLowerCase().includes(query) ||
+                item.category_name?.toLowerCase().includes(query)
             );
         }
 
-        // Apply category filter
+        // Apply category filter to ALL data
         if (selectedCategory) {
-            filtered = filtered.filter(item => item.subcategory_name === selectedCategory);
+            const category = categories.find(cat => cat.id === selectedCategory);
+            if (category) {
+                const subcategoryIds = category.subcategories.map(sub => sub.id);
+                filtered = filtered.filter(item => subcategoryIds.includes(item.subcategory_id));
+            }
         }
 
         setFilteredItems(filtered);
+        setHasMoreDisplay(currentDisplayPage * itemsPerDisplayPage < filtered.length);
     };
 
-    const fetchCategories = async () => {
-        try {
-            setLoading(true);
-            const response = await mainAxios.get('/categories/');
-            setCategories(response.data);
-        } catch (err) {
-            setError('Failed to fetch categories');
-            console.error('Error fetching categories:', err);
-        } finally {
-            setLoading(false);
-        }
+    const updateDisplayedItems = (page: number) => {
+        const startIndex = 0;
+        const endIndex = page * itemsPerDisplayPage;
+        const itemsToShow = filteredItems.slice(startIndex, endIndex);
+        setDisplayedItems(itemsToShow);
+        setHasMoreDisplay(endIndex < filteredItems.length);
     };
-
-const fetchMenuItems = async (pageNum: number) => {
-    try {
-        if (pageNum === 1) {
-            setInitialLoad(true);
-        } else {
-            setIsLoadingMore(true);
-        }
-
-        const response = await mainAxios.get(`/menu/?page=${pageNum}&limit=${itemsPerPage}`);
-        const newItems = response.data.items || response.data;
-
-        if (pageNum === 1) {
-            setAllMenuItems(newItems);
-            setFilteredItems(newItems);
-            setDisplayedItems(newItems.slice(0, itemsPerPage));
-        } else {
-            // For load more, append to existing items
-            const updatedAllItems = [...allMenuItems, ...newItems];
-            setAllMenuItems(updatedAllItems);
-            
-            // Re-apply filters to the updated list
-            let filtered = updatedAllItems;
-            if (searchTerm) {
-                const query = searchTerm.toLowerCase();
-                filtered = filtered.filter(item =>
-                    item.name.toLowerCase().includes(query) ||
-                    item.description.toLowerCase().includes(query)
-                );
-            }
-            if (selectedCategory) {
-                filtered = filtered.filter(item => item.subcategory_name === selectedCategory);
-            }
-            
-            setFilteredItems(filtered);
-            setDisplayedItems(filtered.slice(0, (pageNum) * itemsPerPage));
-        }
-
-        setHasMore(newItems.length === itemsPerPage);
-        setPage(pageNum);
-    } catch (err) {
-        setError('Failed to fetch menu items');
-        console.error('Error fetching menu items:', err);
-    } finally {
-        setInitialLoad(false);
-        setIsLoadingMore(false);
-    }
-};
 
     const handleLoadMoreClick = () => {
-        if (!isLoadingMore && hasMore) {
-        }
-        fetchMenuItems(page + 1);
+        if (!hasMoreDisplay || isLoadingMore) return;
+
+        setIsLoadingMore(true);
+        
+        setTimeout(() => {
+            const nextPage = currentDisplayPage + 1;
+            setCurrentDisplayPage(nextPage);
+            updateDisplayedItems(nextPage);
+            setIsLoadingMore(false);
+        }, 300);
+    };
+
+    const handleCategorySelect = (categoryId: number | null) => {
+        setSelectedCategory(categoryId);
+        setCurrentDisplayPage(1);
     };
 
     const fetchAvailableTables = async () => {
@@ -478,15 +542,12 @@ const fetchMenuItems = async (pageNum: number) => {
     };
 
     const handleBookingNext = async () => {
-        // Validate current step before proceeding
         if (bookingStep === 1) {
-            // Validate customer info
             if (!bookingData.customer_name.trim() || !bookingData.customer_phone.trim()) {
                 setError('Please provide your name and phone number');
                 return;
             }
 
-            // Validate number of people
             if (bookingData.number_of_people < 1) {
                 setError('Number of people must be at least 1');
                 return;
@@ -503,7 +564,6 @@ const fetchMenuItems = async (pageNum: number) => {
                 setLoading(false);
             }
         } else if (bookingStep === 2) {
-            // Validate table selection
             if (!bookingData.table_id) {
                 setError('Please select a table');
                 return;
@@ -525,7 +585,6 @@ const fetchMenuItems = async (pageNum: number) => {
             setLoading(true);
             setError(null);
 
-            // Validate inputs based on order type
             if (orderType !== 'booking') {
                 if (!orderData.customer_name.trim() || !orderData.customer_phone.trim()) {
                     setError('Please provide your name and phone number');
@@ -538,7 +597,6 @@ const fetchMenuItems = async (pageNum: number) => {
                 return;
             }
 
-            // Create order
             const orderPayload = {
                 ...orderData,
                 customer_name: orderData.customer_name || bookingData.customer_name,
@@ -550,7 +608,6 @@ const fetchMenuItems = async (pageNum: number) => {
             const orderId = orderResponse.data.id;
             setCreatedOrderId(orderId);
 
-            // If booking, also book the table
             if (orderType === 'booking') {
                 await mainAxios.post('/tables/book', {
                     ...bookingData,
@@ -562,7 +619,6 @@ const fetchMenuItems = async (pageNum: number) => {
                 setOrderSuccess(true);
             }
 
-            // Move to payment step
             setPaymentStep('payment');
 
         } catch (err: any) {
@@ -584,7 +640,6 @@ const fetchMenuItems = async (pageNum: number) => {
             setPaymentReference(response.data.reference_id);
             setPaymentSuccess(true);
 
-            // Start polling for payment status
             checkPaymentStatusPeriodically(response.data.reference_id);
 
         } catch (err: any) {
@@ -598,7 +653,7 @@ const fetchMenuItems = async (pageNum: number) => {
 
     const checkPaymentStatusPeriodically = async (referenceId: string) => {
         let attempts = 0;
-        const maxAttempts = 20; // Check for 5 minutes (20 * 15 seconds)
+        const maxAttempts = 20;
 
         const checkStatus = async () => {
             if (attempts >= maxAttempts) {
@@ -612,13 +667,11 @@ const fetchMenuItems = async (pageNum: number) => {
 
                 if (status === 'completed') {
                     setError('Payment completed successfully!');
-                    // You might want to update the UI to show payment completion
                 } else if (status === 'failed') {
                     setError('Payment failed. Please try again.');
                 } else {
-                    // Continue polling if still pending
                     attempts++;
-                    setTimeout(checkStatus, 15000); // Check every 15 seconds
+                    setTimeout(checkStatus, 15000);
                 }
             } catch (err) {
                 console.error('Error checking payment status:', err);
@@ -651,8 +704,6 @@ const fetchMenuItems = async (pageNum: number) => {
                 return (
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium text-gray-900">Booking Details</h3>
-
-                        {/* Customer Information for Booking */}
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
@@ -675,7 +726,6 @@ const fetchMenuItems = async (pageNum: number) => {
                                 />
                             </div>
                         </div>
-
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Number of People</label>
@@ -729,7 +779,6 @@ const fetchMenuItems = async (pageNum: number) => {
                                 <ChevronLeft size={20} />
                             </button>
                         </div>
-
                         {loading ? (
                             <div className="text-center py-8">
                                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
@@ -909,8 +958,6 @@ const fetchMenuItems = async (pageNum: number) => {
         );
     };
 
-    const uniqueCategories = [...new Set(allMenuItems.map(item => item.subcategory_name))];
-
     return (
         <div className="min-h-screen bg-white">
             <div className="max-w-11/12 mx-auto px-4 py-8">
@@ -925,6 +972,14 @@ const fetchMenuItems = async (pageNum: number) => {
                     </motion.h1>
                     <p className="text-gray-600">Discover our delicious menu</p>
                 </div>
+
+                {/* Background Loading Indicator */}
+                {backgroundLoading && (
+                    <div className="fixed top-4 right-4 bg-orange-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
+                        <Loader size={16} className="animate-spin" />
+                        <span className="text-sm">Loading more items...</span>
+                    </div>
+                )}
 
                 {/* Error Message */}
                 <AnimatePresence>
@@ -974,12 +1029,28 @@ const fetchMenuItems = async (pageNum: number) => {
                     </div>
                 </div>
 
-                {/* Category Tabs - Horizontal under search */}
+                {/* Category Tabs */}
                 <CategoryTabs
-                    categories={uniqueCategories}
+                    categories={categories}
                     selectedCategory={selectedCategory}
-                    onCategorySelect={setSelectedCategory}
+                    onCategorySelect={handleCategorySelect}
                 />
+
+                {/* Results Count */}
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            {selectedCategory 
+                                ? categories.find(cat => cat.id === selectedCategory)?.name
+                                : 'All Menu Items'
+                            }
+                        </h2>
+                        <p className="text-gray-600">
+                            Showing {displayedItems.length} of {filteredItems.length} items
+                            {searchTerm || selectedCategory ? ' (filtered)' : ''}
+                        </p>
+                    </div>
+                </div>
 
                 {/* Menu Items */}
                 <AnimatePresence mode="wait">
@@ -1014,33 +1085,48 @@ const fetchMenuItems = async (pageNum: number) => {
                             />
 
                             {/* Load More Button */}
-                            {/* {!hasMore && (
-                            )} */}
+                            {hasMoreDisplay && displayedItems.length > 0 && (
                                 <div className="flex justify-center mt-8">
-                                    <button
+                                    <motion.button
                                         onClick={handleLoadMoreClick}
                                         disabled={isLoadingMore}
-                                        className="bg-orange-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="bg-orange-600 text-white px-8 py-4 rounded-lg font-medium hover:bg-orange-700 transition-all duration-200 disabled:opacity-50 flex items-center gap-3 shadow-lg hover:shadow-xl"
                                     >
                                         {isLoadingMore ? (
                                             <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                                Loading...
+                                                <Loader size={20} className="animate-spin" />
+                                                Loading More Items...
                                             </>
                                         ) : (
                                             <>
                                                 <Plus size={20} />
-                                                Load More
+                                                Load More ({Math.min(itemsPerDisplayPage, filteredItems.length - displayedItems.length)} items)
                                             </>
                                         )}
-                                    </button>
+                                    </motion.button>
                                 </div>
+                            )}
 
                             {/* End of results */}
-                            {!hasMore && displayedItems.length > 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                    <p>All {displayedItems.length} items displayed</p>
-                                </div>
+                            {!hasMoreDisplay && displayedItems.length > 0 && (
+                                <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-center py-12"
+                                >
+                                    <div className="bg-gradient-to-r from-orange-100 to-orange-50 border border-orange-200 rounded-lg p-6 max-w-md mx-auto">
+                                        <Check size={32} className="text-orange-600 mx-auto mb-3" />
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">All Caught Up!</h3>
+                                        <p className="text-gray-600">
+                                            {allDataLoaded 
+                                                ? `You've seen all ${filteredItems.length} delicious items ${selectedCategory ? 'in this category' : 'in our menu'}.`
+                                                : `Showing ${displayedItems.length} of ${filteredItems.length} items. More may be loading in the background.`
+                                            }
+                                        </p>
+                                    </div>
+                                </motion.div>
                             )}
                         </motion.div>
                     )}
