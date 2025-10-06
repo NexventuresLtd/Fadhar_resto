@@ -329,7 +329,7 @@ const CustomerMenu: React.FC = () => {
     const [backgroundLoading, setBackgroundLoading] = useState(false);
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     console.log(hasMoreData)
-    const itemsPerDisplayPage = 20;
+    const itemsPerDisplayPage = 10;
     const itemsPerFetch = 100;
 
     // Fetch initial data on component mount
