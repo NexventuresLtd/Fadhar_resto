@@ -694,7 +694,7 @@ const CustomerMenu: React.FC = () => {
 
     const handleWhatsAppInquiry = (name: any, qua: any, price: any) => {
         const message = `Hello, I'm reaching out regarding my order of ${name} (Quantity: ${qua}, Price: ${price}) at Fadhar Restaurant.`;
-        const phoneNumber = '250783330008';
+        const phoneNumber = '250794285876';
         // const phoneNumber = '250794285876';
         contactMe(phoneNumber, message)
     };
