@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Grid, List, Search, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils, Plus, Loader } from 'lucide-react';
+import { MessageCircle, Grid, List, Search, X, ChevronRight, ChevronLeft, Check, CreditCard, DollarSign, BikeIcon, HandGrab, BookMarked, Utensils, Plus, Loader, Coins } from 'lucide-react';
 import mainAxios from '../../Instance/mainAxios';
 import { contactMe } from '../../app/WhatsappMessage';
 
@@ -251,17 +251,16 @@ const CategoryTabs: React.FC<{
                     Show All
                 </button>
             </div>
-            <div 
+            <div
                 ref={scrollContainerRef}
                 className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide"
             >
                 <button
                     onClick={() => onCategorySelect(null)}
-                    className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${
-                        selectedCategory === null 
-                            ? 'bg-orange-500 text-white border-orange-500 shadow-sm' 
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                    }`}
+                    className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${selectedCategory === null
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
                 >
                     All Items
                 </button>
@@ -269,11 +268,10 @@ const CategoryTabs: React.FC<{
                     <button
                         key={category.id}
                         onClick={() => onCategorySelect(category.id)}
-                        className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${
-                            selectedCategory === category.id 
-                                ? 'bg-orange-500 text-white border-orange-500 shadow-sm' 
-                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                        }`}
+                        className={`flex-shrink-0 px-3 py-2 rounded-md font-medium transition-all whitespace-nowrap border ${selectedCategory === category.id
+                            ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            }`}
                     >
                         {category.name}
                     </button>
@@ -358,14 +356,14 @@ const CustomerMenu: React.FC = () => {
     const fetchInitialData = async () => {
         try {
             setInitialLoad(true);
-            
+
             // Fetch categories first
             const categoriesResponse = await mainAxios.get('/categories/');
             setCategories(categoriesResponse.data);
 
             // Fetch first batch of menu items
             await fetchMenuItems(1);
-            
+
             setError(null);
         } catch (err) {
             setError('Failed to fetch data');
@@ -383,9 +381,9 @@ const CustomerMenu: React.FC = () => {
                     limit: itemsPerFetch
                 }
             });
-            
+
             const items = response.data.items || response.data;
-            
+
             if (items && items.length > 0) {
                 setAllMenuItems(prev => {
                     const combined = [...prev, ...items];
@@ -395,14 +393,14 @@ const CustomerMenu: React.FC = () => {
                     );
                     return uniqueItems;
                 });
-                
+
                 // Check if there's more data to fetch
                 const hasMore = items.length === itemsPerFetch;
                 setHasMoreData(hasMore);
                 if (!hasMore) {
                     setAllDataLoaded(true);
                 }
-                
+
                 return hasMore;
             } else {
                 setHasMoreData(false);
@@ -472,7 +470,7 @@ const CustomerMenu: React.FC = () => {
         if (!hasMoreDisplay || isLoadingMore) return;
 
         setIsLoadingMore(true);
-        
+
         setTimeout(() => {
             const nextPage = currentDisplayPage + 1;
             setCurrentDisplayPage(nextPage);
@@ -690,6 +688,7 @@ const CustomerMenu: React.FC = () => {
         const amount = selectedItem.price * orderData.quantity;
 
         await initiatePayment(createdOrderId, amount, phone);
+
     };
 
     const handleWhatsAppInquiry = (name: any, qua: any, price: any) => {
@@ -954,6 +953,19 @@ const CustomerMenu: React.FC = () => {
                         <MessageCircle size={18} />
                         <span>Chat on WhatsApp</span>
                     </button>
+                    <button
+                        onClick={() => {
+                            {
+                                const code = `*182*8*1*1912432*${selectedItem.price}#`
+                                    .replace('#', '%23'); // Encode the hash for URL safety
+                                window.location.href = `tel:${code}`;
+                            }
+                        }}
+                        className="flex items-center mt-2 cursor-pointer justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg mx-auto hover:bg-green-700 transition-colors"
+                    >
+                        <Coins size={18} />
+                        <span>Finish Payments</span>
+                    </button>
                 </div>
             </div>
         );
@@ -1041,7 +1053,7 @@ const CustomerMenu: React.FC = () => {
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            {selectedCategory 
+                            {selectedCategory
                                 ? categories.find(cat => cat.id === selectedCategory)?.name
                                 : 'All Menu Items'
                             }
@@ -1112,7 +1124,7 @@ const CustomerMenu: React.FC = () => {
 
                             {/* End of results */}
                             {!hasMoreDisplay && displayedItems.length > 0 && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     className="text-center py-12"
@@ -1121,7 +1133,7 @@ const CustomerMenu: React.FC = () => {
                                         <Check size={32} className="text-orange-600 mx-auto mb-3" />
                                         <h3 className="text-lg font-semibold text-gray-900 mb-2">All Caught Up!</h3>
                                         <p className="text-gray-600">
-                                            {allDataLoaded 
+                                            {allDataLoaded
                                                 ? `You've seen all ${filteredItems.length} delicious items ${selectedCategory ? 'in this category' : 'in our menu'}.`
                                                 : `Showing ${displayedItems.length} of ${filteredItems.length} items. More may be loading in the background.`
                                             }
